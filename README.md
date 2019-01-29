@@ -1,68 +1,66 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+this is a course on how to build a checkers game using reactJS
 
-## Available Scripts
+it covers:
 
-In the project directory, you can run:
+- flex box
+- svg in `<img/>`
+- svg as `<svg />`
+- react lifecycle, state management, network behaviour
+- an algorithm! (calculate a list of legal checkers moves at any given board)
+- createUser & login & gameplay using a game server (http using fetch)
+- writing a game server in dynamoDB + lambda + apiGateway
+- another algorithm! (writing a computer player)
+- unit testing for algorithms using jest, component testing with enzyme + jest
 
-### `npm start`
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+if you can't explain it to freshmen, you don't understand it well enough
+                     - r p feynman
+```
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
 
-### `npm test`
+## agenda
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. 2p local
 
-### `npm run build`
+- make a board Component
+- render game pieces onto the board
+- take `onClick` from `<Board pieces={this.state.pieces} />
+- calculate legal checkers moves, test
+  - render legal checkers moves as piece on `Board`
+- move pieces, giving each player his turn
+- calculate when the game has ended, test
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. 1p v cp local
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+- select cp game or 2p local game
+- onUpdate lifecycle -> trigger cp play
+- algorithm for selecting move, test
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. 2p over network
 
-### `npm run eject`
+- assume game server exists
+- create a user UX
+- signin UX
+- create game UX
+- join game UX
+- use network hook to send my moves & load other player's moves
+- chat?
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+4. cloud game server
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+- aws account
+- dynamoDB
+- POST /user
+  - apiGateway, lambda, dynamo table + create call
+- /login -> JWT
+  - apiGateway, lambda, dynamo check call
+- POST /game
+  - apiGateway + JWT authorizer, lambda, dynamo table + create call
+- /joinTable
+  - apiGateway, lambda, dynamo update call
+- PUT /game { move }
+  - apiGateway, lambda, dynamo update call
+- GET /game/:id
+  - apiGatewat, lambda, dynamo read call
+- chat?
