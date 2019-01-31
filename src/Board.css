@@ -1,0 +1,33 @@
+.Board {
+  height: 80vh;
+  max-height: 80vw;
+  
+  width: 80vh;
+  max-width: 80vw;
+  
+  margin: 10vh auto;
+  background-color: #911;
+
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.Board .BoardRow {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  height: 12.5%;
+}
+
+.Board .BoardRow .BoardCell {
+  height: 100%;
+  width: 12.5%;
+}
+
+.Board .BoardRow:nth-child(2n) .BoardCell:nth-child(2n) {
+  background-color: black;
+}
+
+.Board .BoardRow:nth-child(2n+1) .BoardCell:nth-child(2n+1) {
+  background-color: black;
+}

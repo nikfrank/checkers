@@ -21,7 +21,7 @@ if you can't explain it to freshmen, you don't understand it well enough
 
 ## agenda
 
-1. 2p local
+1. 2p local game
 
 - make a board Component
 - render game pieces onto the board
@@ -64,3 +64,44 @@ if you can't explain it to freshmen, you don't understand it well enough
 - GET /game/:id
   - apiGatewat, lambda, dynamo read call
 - chat?
+
+
+### 2p local game
+
+#### make a board Component
+
+`$ touch ./src/Board.js`
+
+./src/Board.js
+```js
+
+```
+
+./src/App.js
+```js
+import Board from './Board';
+
+//...
+
+render(){
+  return (
+    <div className='App'>
+      <Board />
+    </div>
+  );
+}
+```
+
+
+
+
+
+
+
+
+- render game pieces onto the board
+- take `onClick` from `<Board pieces={this.state.pieces} />
+- calculate legal checkers moves, test
+  - render legal checkers moves as piece on `Board`
+- move pieces, giving each player his turn
+- calculate when the game has ended, test
