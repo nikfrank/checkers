@@ -309,7 +309,46 @@ great, now we see the coordinates and current occupant piece logged
 now we can start the game logic
 
 
-- calculate legal checkers moves, test
+#### calculate legal checkers moves, test
+
+now, in our `onClickCell` function, we can respond to the input by displaying legal moves on the board
+
+when writing an algorithm (even simple ones like this) I like to do some pseudo code first
+
+```
+user selected a piece (assert it to be his turn and his piece)
+
+a simple piece can - at very least - move forward diagonally into empty squares
+  -> list all empty spaces forward diagonal one move
+
+a king can - at the very least - move in any diagonal into an empty space
+  -> list all empty spaces diagonal one move
+
+a simple piece can capture by jumping a piece diagonally in front of it with an empty space beyond it
+  -> list all empty spaces forward diagonal two moves with an opponent piece diagonal one
+
+a king can capture by jumping a piece diagonally any direction with an empty space beyond it
+  -> list all empty spaces diagonal two moves with an opponent piece diagonal one
+
+when a piece hits the end of the board it becomes a king (can move/jump backwards)
+
+a piece may continue jumping opponent pieces suchly until no valid moves exist
+
+a piece that becomes a king by jumping to the end of the board may continue jumping as a king
+
+if there is a jumping move available, non-jumping moves are filtered out
+
+opponent's pieces jumped in the middle of a turn are not removed until the end of the turn.
+```
+
+in order to keep our user experience simple, we will show only the 'single jump' moves on the board
+
+when a second jump is available, the player will be presented withose options once he has chosen his first jump.
+
+his turn will end once there are no more moves available.
+
+
+
   - render legal checkers moves as piece on `Board`
 - move pieces, giving each player his turn
 - calculate when the game has ended, test
