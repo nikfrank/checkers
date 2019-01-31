@@ -350,7 +350,132 @@ when a second jump is available, the player will be presented withose options on
 his turn will end once there are no more moves available.
 
 
+---
 
-  - render legal checkers moves as piece on `Board`
-- move pieces, giving each player his turn
-- calculate when the game has ended, test
+
+#### calculate valid non-jump moves
+
+./src/App.js
+```js
+  onClickCell = (col, row)=> {
+    const selected = this.state.pieces[col][row];
+    
+    if( !selected ) return;
+
+    // start with two possible moves, filter out if off-board or occupado
+    const validMoves = [ [col+1, row+1], [col-1, row+1] ]
+      .filter(([c, r])=> (
+        c >= 0 && c <= 7 && !this.state.pieces[c][r]
+      ));
+
+    // generate "board layer" for moves as Array[8][8]
+    const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
+
+    validMoves.forEach(([c, r])=> (moves[c][r] = true));
+
+    this.setState({ moves });
+  }
+```
+
+
+
+#### render legal checkers moves as piece on `Board`
+
+./src/Piece.js
+```js
+import React from 'react';
+
+const glyphColors = {
+  p1: 'grey',
+  p2: 'green',
+  move: 'yellow',
+};
+
+const glyphSizes = {
+  p1: 20,
+  p2: 20,
+  move: 5,
+};
+
+export default ({
+  glyph='circle'
+})=> (
+  <svg className='Piece' viewBox='0 0 100 100'>
+    <circle r={glyphSizes[glyph]} cx={50} cy={50} fill={glyphColors[glyph]}/>
+  </svg>
+);
+```
+
+./src/Board.js
+```js
+//...
+
+export default ({
+  //..,
+  moves=[[]],
+})=> (
+
+
+//...
+            {moves[colIndex] && moves[colIndex][rowIndex] ? (
+               <Piece glyph='move' />
+            ) : null}
+
+```
+
+
+### click on "available move" space to trigger game board update
+
+./src/App.js
+```js
+
+  state = {
+    pieces: initCheckersBoard,
+    selectedPiece: null,
+    moves: [],
+  }
+
+  onClickCell = (col, row)=> {
+    const selectedPiece = this.state.pieces[col][row];
+    const selectedMove = (this.state.moves[col]||[])[row];
+    
+    if( !selectedPiece && !selectedMove ) return;
+
+    if(selectedPiece){
+      // ... logic from before ...
+      
+    } else if(selectedMove){
+
+      const pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
+
+      pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
+      pieces[col][row] = 'p1';
+      
+      this.setState({ moves: [], pieces });
+    }
+  }
+```
+
+great, now we can repeatedly move our pieces around.
+
+
+
+
+
+#### giving each player his turn
+
+
+
+
+#### jumps, keep jumping
+
+
+
+
+#### king moves
+
+
+
+
+
+#### calculate when the game has ended, test

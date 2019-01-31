@@ -7,6 +7,7 @@ export default ({
   size=8,
   onClick=(()=>0),
   pieces=[[]],
+  moves=[[]],
 })=> (
   <div className='Board'>
     {Array(size).fill(0).map((_, rowIndex)=> (
@@ -17,6 +18,9 @@ export default ({
                className='BoardCell'>
             {pieces[colIndex] && pieces[colIndex][rowIndex] ? (
                <Piece glyph={pieces[colIndex][rowIndex]}/>
+            ) : null}
+            {moves[colIndex] && moves[colIndex][rowIndex] ? (
+               <Piece glyph='move' />
             ) : null}
           </div>
         ) )}
