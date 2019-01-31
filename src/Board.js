@@ -3,20 +3,9 @@ import './Board.css';
 
 import Piece from './Piece';
 
-const defaultPieces = [
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-];
-
 export default ({
   size=8,
-  pieces=defaultPieces,
+  pieces=[[]],
 })=> (
   <div className='Board'>
     {Array(size).fill(0).map((_, rowIndex)=> (
