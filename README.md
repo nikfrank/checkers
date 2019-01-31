@@ -339,6 +339,8 @@ a piece that becomes a king by jumping to the end of the board may continue jump
 if there is a jumping move available, non-jumping moves are filtered out
 
 opponent's pieces jumped in the middle of a turn are not removed until the end of the turn.
+
+player may end turn if he has jumped his piece back to a space the piece was on previously (ko)
 ```
 
 in order to keep our user experience simple, we will show only the 'single jump' moves on the board
