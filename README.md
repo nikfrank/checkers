@@ -465,6 +465,21 @@ great, now we can repeatedly move our pieces around.
 #### giving each player his turn
 
 
+./src/App.js
+```js
+    if(selectedPiece && selectedPiece === this.state.turn){
+      const direction = selectedPiece === 'p1' ? 1 : -1;
+      
+      // start with two possible moves, filter out if off-board or occupado
+      const validMoves = [ [col+1, row+direction], [col-1, row+direction] ]
+
+//...
+
+      pieces[col][row] = this.state.turn;
+
+      this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
+```
+
 
 
 #### jumps, keep jumping

@@ -19,6 +19,7 @@ class App extends Component {
     pieces: initCheckersBoard,
     selectedPiece: null,
     moves: [],
+    turn: 'p1',
   }
 
   onClickCell = (col, row)=> {
@@ -27,9 +28,11 @@ class App extends Component {
     
     if( !selectedPiece && !selectedMove ) return;
 
-    if(selectedPiece){
+    if(selectedPiece && selectedPiece === this.state.turn){
+      const direction = selectedPiece === 'p1' ? 1 : -1;
+      
       // start with two possible moves, filter out if off-board or occupado
-      const validMoves = [ [col+1, row+1], [col-1, row+1] ]
+      const validMoves = [ [col+1, row+direction], [col-1, row+direction] ]
         .filter(([c, r])=> (
           c >= 0 && c <= 7 && !this.state.pieces[c][r]
         ));
@@ -46,9 +49,9 @@ class App extends Component {
       const pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
 
       pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
-      pieces[col][row] = 'p1';
+      pieces[col][row] = this.state.turn;
       
-      this.setState({ moves: [], pieces });
+      this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
     }
   }
 
