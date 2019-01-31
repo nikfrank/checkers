@@ -74,8 +74,65 @@ if you can't explain it to freshmen, you don't understand it well enough
 
 ./src/Board.js
 ```js
+import React from 'react';
+import './Board.css';
 
+export default ({
+  size=8,
+  pieces=[[]],
+})=> (
+  <div className='Board'>
+    {Array(size).fill(0).map((_, rowIndex)=> (
+      <div key={'row'+rowIndex} className='BoardRow'>
+        {Array(size).fill(0).map((_, colIndex)=> (
+          <div key={'cell'+rowIndex+','+colIndex} className='BoardCell'>
+          </div>
+        ) )}
+      </div>
+    ))}
+  </div>
+);
 ```
+
+`$ touch ./src/Board.css`
+
+./src/Board.css
+```css
+.Board {
+  height: 80vh;
+  max-height: 80vw;
+  
+  width: 80vh;
+  max-width: 80vw;
+  
+  margin: 10vh auto;
+  background-color: #911;
+
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.Board .BoardRow {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  height: 12.5%;
+}
+
+.Board .BoardRow .BoardCell {
+  height: 100%;
+  width: 12.5%;
+}
+
+.Board .BoardRow:nth-child(2n) .BoardCell:nth-child(2n) {
+  background-color: black;
+}
+
+.Board .BoardRow:nth-child(2n+1) .BoardCell:nth-child(2n+1) {
+  background-color: black;
+}
+```
+
 
 ./src/App.js
 ```js
@@ -92,15 +149,94 @@ render(){
 }
 ```
 
+./src/App.css
+```css
+.App {
+  text-align: center;
+  width: 100%;
+}
+
+/* we can delete the rest of this file! */
+```
+
+great, our board looks fantastic
+
+
+
+#### render game pieces onto the board
+
+let's make a `Piece` Component
+
+`$ touch ./src/Piece.js`
+
+./src/Piece.js
+```js
+import React from 'react';
+
+export default ({
+  glyph='circle'
+})=> (
+  <svg className='Piece' viewBox='0 0 100 100'>
+    <circle r={20} cx={50} cy={50} fill={glyph === 'p1' ? 'grey' : 'green'}/>
+  </svg>
+);
+```
+
+so we can render it from `Board`
+
+./src/Board.js
+```js
+import React from 'react';
+import './Board.css';
+
+import Piece from './Piece';
+
+const defaultPieces = [
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+];
+
+export default ({
+  size=8,
+  pieces=defaultPieces,
+})=> (
+  <div className='Board'>
+    {Array(size).fill(0).map((_, rowIndex)=> (
+      <div key={'row'+rowIndex} className='BoardRow'>
+        {Array(size).fill(0).map((_, colIndex)=> (
+          <div key={'cell'+rowIndex+','+colIndex} className='BoardCell'>
+            {pieces[colIndex] && pieces[colIndex][rowIndex] ? (
+               <Piece glyph={pieces[colIndex][rowIndex]} />
+            ) : null}
+          </div>
+        ) )}
+      </div>
+    ))}
+  </div>
+);
+```
+
+great, that looks fantastic
+
+we should move those pieces into the `state` on `App`
+
+./src/App.js
+```js
+//...
+```
+
+
+#### take `onClick` from `<Board pieces={this.state.pieces} />
 
 
 
 
-
-
-
-- render game pieces onto the board
-- take `onClick` from `<Board pieces={this.state.pieces} />
 - calculate legal checkers moves, test
   - render legal checkers moves as piece on `Board`
 - move pieces, giving each player his turn
