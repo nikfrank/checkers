@@ -228,13 +228,85 @@ we should move those pieces into the `state` on `App`
 
 ./src/App.js
 ```js
-//...
+import React, { Component } from 'react';
+import './App.css';
+
+import Board from './Board';
+
+const initCheckersBoard = [
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+];
+
+class App extends Component {
+  state = {
+    pieces: initCheckersBoard,
+  }
+  
+  render() {
+    return (
+      <div className="App">
+        <Board pieces={this.state.pieces}/>
+      </div>
+    );
+  }
+}
+
+export default App;
 ```
 
 
 #### take `onClick` from `<Board pieces={this.state.pieces} />
 
+./src/App.js
+```js
+//...
 
+class App extends Component {
+  state = {
+    pieces: initCheckersBoard,
+  }
+
+  onClickCell = (col, row)=> console.log(col, row, this.state.pieces[col][row])
+
+  render() {
+    return (
+      <div className="App">
+        <Board pieces={this.state.pieces} onClick={this.onClickCell}/>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+
+./src/Board.js
+```js
+//...
+
+export default ({
+  size=8,
+  onClick=(()=>0),
+  pieces=[[]],
+})=> (
+//...
+          <div key={'cell'+rowIndex+','+colIndex}
+               onClick={()=> onClick(colIndex, rowIndex)}
+               className='BoardCell'>
+//...
+```
+
+great, now we see the coordinates and current occupant piece logged
+
+now we can start the game logic
 
 
 - calculate legal checkers moves, test
