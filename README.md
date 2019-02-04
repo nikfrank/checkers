@@ -3,11 +3,10 @@ this is a course on how to build a checkers game using reactJS
 it covers:
 
 - flex box
-- svg in `<img/>`
-- svg as `<svg />`
-- react lifecycle, state management, network behaviour
+- svg as `<svg />` in react
+- react lifecycle, state management, impure / network behaviour
 - an algorithm! (calculate a list of legal checkers moves at any given board)
-- createUser & login & gameplay using a game server (http using fetch)
+- createUser & login & gameplay using a game server (http using fetch / socket.io)
 - writing a game server in dynamoDB + lambda + apiGateway
 - another algorithm! (writing a computer player)
 - unit testing for algorithms using jest, component testing with enzyme + jest
@@ -922,3 +921,52 @@ great, now we can move the king around, but only as if it is a normal piece! Let
 
 
 #### calculate when the game has ended, test
+
+
+
+
+
+---
+---
+
+
+### computer player
+
+#### install react-router-dom
+
+put three routes:
+
+- 2p local (as before)
+- cp local (new)
+- network 2p (coming soon...)
+
+
+refactor App -> Game, make new App = (routing)
+
+`<Game playerType='cp local' deal={newCard} cp={cpPlayer} onComplete={winner=> window.alert(winner + ' won!')}/>`
+
+render a navbar withe three choices
+
+
+
+#### create an impure / network layer
+
+refactor newCard into a prop function
+
+write cp chooseMove (random at first)
+
+trigger state update (move piece) from prop function async
+
+
+#### unit test the cp player, improve cp play
+
+
+#### install enzyme
+#### test the entire 2p local flow
+#### mock the network layer and test the cp mode
+#### mock the network layer and test the network 2p mode
+
+---
+---
+
+#### integrate to the game server
