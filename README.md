@@ -873,6 +873,13 @@ export default ({
 );
 ```
 
+#### calculate validMoves for kings
+
+- kings can move backwards
+- kings can capture backwards
+- kings, while jumping, can quit jumping
+  - we can implement this by jumping to the current square
+  - our `onClickCell` will have to understand this as `turn over`
 
 
 #### calculate when the game has ended, test
