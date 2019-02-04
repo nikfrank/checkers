@@ -33,13 +33,24 @@ export const validMoves = (pieces, col, row, isJumping)=>{
 };
 
 export const initCheckersBoard = [
-//  [ 'p1', null, 'p1-king', null, null, null, 'p2', null ],
+  //  [ 'p1', null, 'p1-king', null, null, null, 'p2', null ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+];
+
+export const kingCheckersBoard = [
+  [ 'p1', null, null, null, null, null, 'p1-king', null ],
+  [ null, 'p1', null, 'p2', null, 'p2', null, null ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
+  [ 'p1', null, null, null, null, null, null, null ],
+  [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
 ];

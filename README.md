@@ -919,6 +919,35 @@ great, now we can move the king around, but only as if it is a normal piece! Let
   - we can implement this by jumping to the current square
   - our `onClickCell` will have to understand this as `turn over`
 
+so TDD means we write the test first... giddee up!
+
+let's make a king-scenario board in util
+
+./src/util.js
+```js
+// ... we can also put out iniCheckersBoard back to normal
+
+export const kingCheckersBoard = [
+  [ 'p1', null, null, null, null, null, 'p1-king', null ],
+  [ null, 'p1', null, 'p2', null, 'p2', null, null ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
+  [ 'p1', null, null, null, null, null, null, null ],
+  [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+];
+```
+
+
+./src/util.test.js
+```js
+import { validMoves, initCheckersBoard, kingCheckersBoard } from './util';
+
+//...
+```
+
+
 
 #### calculate when the game has ended, test
 

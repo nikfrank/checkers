@@ -1,4 +1,4 @@
-import { validMoves, initCheckersBoard } from './util';
+import { validMoves, initCheckersBoard, kingCheckersBoard } from './util';
 
 it('should allow non-jump moves', ()=>{
   const edgeMoves = validMoves( initCheckersBoard, 0, 2, !'jumping' );
