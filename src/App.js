@@ -32,7 +32,8 @@ class App extends Component {
 
       let jumping = false;
       let pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
-      
+
+      pieces[col][row] = pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]];
       pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
 
       if( Math.abs( col - this.state.selectedPiece[0] ) === 2 ){
@@ -40,8 +41,6 @@ class App extends Component {
         jumping = true;
         pieces[ (col + this.state.selectedPiece[0])/2 ][(row + this.state.selectedPiece[1])/2 ] += '-jumped';
       }
-      
-      pieces[col][row] = this.state.turn;
 
 
       // if turn is over...

@@ -807,7 +807,7 @@ here, we're pretending that the front left piece already jumped to get to the st
 
 
 
-#### king moves (tdd)
+#### rendering the king
 
 in `this.state.pieces` we've been using `'p1'` and `'p2'` for pieces and `null` for empty squares
 
@@ -858,7 +858,7 @@ const glyphSizes = {
   'p1-king': 20,
   p2: 20,
   move: 5,
-  king: 9,
+  king: 10,
 };
 
 export default ({
@@ -866,14 +866,53 @@ export default ({
 })=> (
   <svg className='Piece' viewBox='0 0 100 100'>
     <circle r={glyphSizes[glyph]} cx={50} cy={50} fill={glyphColors[glyph]}/>
-    {glyph.includes('king') ? (
-       <circle r={glyphSizes.king} cx={50} cy={50} fill={glyphColors.king}/>
-    ) : null}
+    {glyph.includes('king') ? [
+       <circle r={glyphSizes.king + 3} cx={50} cy={50} fill={glyphColors.king} key='ring'/>,
+       <circle r={glyphSizes.king} cx={50} cy={50} fill={glyphColors[glyph]} key='fill'/>
+    ] : null}
   </svg>
 );
 ```
 
-#### calculate validMoves for kings
+so the king will show up with his crown
+
+now let's fix the bug when we move the king, that it turns back into a soldier
+
+we have
+
+./src/App.js
+```js
+//...
+
+      pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
+
+//...
+
+      pieces[col][row] = this.state.turn;
+
+//...
+```
+
+which sets the piece in the place we're moving to - to 'p1' or 'p2' based on whose turn it is
+
+we need to fix this so that it sets it to whatever the piece was before we moved it!
+
+
+we can update fix it by doing
+
+```js
+
+      pieces[col][row] = pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]];
+      pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
+
+```
+
+great, now we can move the king around, but only as if it is a normal piece! Let's add the king feature now.
+
+
+#### king moves (tdd)
+
+##### calculate validMoves for kings
 
 - kings can move backwards
 - kings can capture backwards
