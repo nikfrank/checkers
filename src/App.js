@@ -3,12 +3,16 @@ import './App.css';
 
 import Board from './Board';
 
-import { validMoves, initCheckersBoard } from './util';
+import {
+  validMoves,
+  initCheckersBoard,
+//  kingCheckersBoard
+} from './util';
 
 
 class App extends Component {
   state = {
-    pieces: initCheckersBoard,
+    pieces: initCheckersBoard, //kingCheckersBoard
     selectedPiece: null,
     jumpingPiece: null,
     moves: [],

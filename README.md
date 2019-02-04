@@ -939,6 +939,26 @@ export const kingCheckersBoard = [
 ];
 ```
 
+to see what this looks like on the board, we could just render it!
+
+
+./src/App.js
+```js
+//...
+
+import { validMoves, initCheckersBoard, kingCheckersBoard } from './util';
+
+//...
+
+state = {
+  //...
+  pieces: kingCheckersBoard,
+}
+
+//...
+```
+
+
 
 ./src/util.test.js
 ```js
