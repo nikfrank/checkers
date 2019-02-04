@@ -496,8 +496,8 @@ This still isnt' a game though, as only one player can move and there's no way t
 #### jumps
 
 ```js
-    const otherPlayer = this.state.turn.includes('p1') ? 'p2' : 'p1';
-
+      const otherPlayer = (selectedPiece === 'p1') ? 'p2' : 'p1';
+      
       // compute list of valid jump moves, if any
       // start with two possible moves, filter out off-board, occupado, no piece to jump
       const jumpMoves = [ [col+2, row + 2*direction], [col-2, row + 2*direction] ]
@@ -537,10 +537,167 @@ at move selected
 
 #### keep jumping (calculate if move is over)
 
+let's refactor our valid moves logic into a utility function, which we can reuse and test
+
+`$ touch ./src/util.js`
+
+
+./src/util.js
+```js
+export const validMoves = (pieces, col, row, turn)=>{
+  
+}
+```
+
+./src/App.js
+```js
+import { validMoves } from './util';
+
+//...
+
+      const moves = validMoves(this.state.pieces, col, row);
+```
+
+
+./src/util.js
+```js
+export const validMoves = (pieces, col, row)=>{
+  const selectedPiece = pieces[col][row];
+  const direction = selectedPiece === 'p1' ? 1 : -1;
+  const otherPlayer = (selectedPiece === 'p1') ? 'p2' : 'p1';
+
+  // calculate valid non-jumping moves
+  // start with two possible moves, filter out if off-board or occupado
+  const nonjumpMoves = [ [col+1, row+direction], [col-1, row+direction] ]
+    .filter(([c, r])=> (
+      c >= 0 && c <= 7 &&
+      r >= 0 && r <= 7 &&
+      !pieces[c][r]
+    ));
+
+  // compute list of valid jump moves, if any
+  // start with two possible moves, filter out off-board, occupado, no piece to jump
+  const jumpMoves = [ [col+2, row + 2*direction], [col-2, row + 2*direction] ]
+    .filter(([c, r])=> (
+      c >= 0 && c <= 7 &&
+      r >= 0 && r <= 7 &&
+      !pieces[c][r] &&
+      (pieces[ (c + col)/2 ][ (r + row)/2 ]||'').includes(otherPlayer)
+    ));
+  
+  // generate "board layer" for moves as Array[8][8]
+  const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
+  const valid = (jumpMoves.length ? jumpMoves : nonjumpMoves);
+
+  valid.forEach(([c, r])=> (moves[c][r] = true));
+
+  return moves;
+};
+```
+
+now we can reuse this logic in the (selectedMove) section to determine if the move is over
+
+./src/App.js
+```js
+
+      // if turn is over...
+      const moves = validMoves(pieces, col, row, !!'jumping');
+
+      if( !moves.any )
+        pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
+
+      const otherPlayer = this.state.turn === 'p1' ? 'p2' : 'p1';
+      const nextTurn = moves.any ? this.state.turn : otherPlayer;
+                       
+      this.setState({ moves, pieces, turn: nextTurn });
+```
+
+(here I say `!!'jumping'` instead of `true` - which are the same value - because `!!'jumping'` is self-documenting)
+
+there's a problem now though... we've caused an infinite loop for one player
+
+let's fix this
+
+- keep track of jumping piece, if jumpingPiece -> assume it is selected
+
+```
+    jumpingPiece: null,
+
+//...
+
+      const jumpingPiece = moves.any ? [col, row] : null;
+                       
+      this.setState({ moves, pieces, turn: nextTurn, jumpingPiece });
+
+
+//... earlier
+    const { jumpingPiece } = this.state;
+    if( jumpingPiece && selectedPiece ) return;
+```
+
+now we can tell the valid moves function we are jumping, and so don't ever return non-jumping moves
+
+./src/util.js
+```js
+export const validMoves = (pieces, col, row, isJumping)=>{
+//...
+
+  const valid = (jumpMoves.length ? jumpMoves : isJumping ? [] : nonjumpMoves);
+  moves.any = !!valid.length;
+```
+
+now we can finish multi-jump for non king pieces
+
+```js
+else if(selectedMove){
+
+      let jumping = false;
+      let pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
+      
+      pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
+
+      if( Math.abs( col - this.state.selectedPiece[0] ) === 2 ){
+        // jumping
+        jumping = true;
+        pieces[ (col + this.state.selectedPiece[0])/2 ][(row + this.state.selectedPiece[1])/2 ] += '-jumped';
+      }
+      
+      pieces[col][row] = this.state.turn;
+
+
+      // if turn is over...
+      const moves = validMoves(pieces, col, row, jumping);
+
+      if( jumping && !moves.any )
+        pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
+
+      const otherPlayer = this.state.turn === 'p1' ? 'p2' : 'p1';
+      const nextTurn = jumping && moves.any ? this.state.turn : otherPlayer;
+      const jumpingPiece = moves.any && jumping ? [col, row] : null;
+                       
+      this.setState({
+        moves: jumping ? moves : [],
+        pieces,
+        turn: nextTurn,
+        jumpingPiece,
+        selectedPiece: jumpingPiece,
+      });
+    }
+```
+
+
+#### testing our game logic
+
+`$ touch ./src/util.test.js`
+
+remember all create-react-app made applications can use `npm run test` to run jest tests (which looks for files *.test.js)
+
+`npm run test`
 
 
 
-#### king moves
+
+#### king moves (tdd)
 
 
 
