@@ -1,7 +1,7 @@
 export const validMoves = (pieces, col, row, isJumping)=>{
-  const selectedPiece = pieces[col][row];
-  const direction = selectedPiece === 'p1' ? 1 : -1;
-  const otherPlayer = (selectedPiece === 'p1') ? 'p2' : 'p1';
+  const selectedPiece = pieces[col][row] ||'';
+  const direction = selectedPiece.includes('p1') ? 1 : -1;
+  const otherPlayer = (selectedPiece.includes('p1')) ? 'p2' : 'p1';
 
   // calculate valid non-jumping moves
   // start with two possible moves, filter out if off-board or occupado
@@ -33,6 +33,7 @@ export const validMoves = (pieces, col, row, isJumping)=>{
 };
 
 export const initCheckersBoard = [
+//  [ 'p1', null, 'p1-king', null, null, null, 'p2', null ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],

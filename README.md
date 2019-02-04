@@ -562,9 +562,9 @@ import { validMoves } from './util';
 ./src/util.js
 ```js
 export const validMoves = (pieces, col, row)=>{
-  const selectedPiece = pieces[col][row];
-  const direction = selectedPiece === 'p1' ? 1 : -1;
-  const otherPlayer = (selectedPiece === 'p1') ? 'p2' : 'p1';
+  const selectedPiece = pieces[col][row] || '';
+  const direction = selectedPiece.includes('p1') ? 1 : -1;
+  const otherPlayer = selectedPiece.includes('p1') ? 'p2' : 'p1';
 
   // calculate valid non-jumping moves
   // start with two possible moves, filter out if off-board or occupado
@@ -818,8 +818,60 @@ let's take advantage of the `.includes` expressions we wrote earlier by using `'
 this will also make it pretty easy to know what's going on.
 
 
+first, let's put a king on the board and render a crown on it.
+
+For artistic reasons, I will draw the crown from the bird's-eye view, which will allow me to just draw a ring! (very easy)
 
 
+temporarily
+
+./src/util.js
+```js
+//...
+export const initCheckersBoard = [
+  [ 'p1', null, 'p1-king', null, null, null, 'p2', null ],
+//...
+```
+
+we'll see the piece disappear from the board, as we aren't checking for it in the `Piece` render
+
+although if we click it, its moves still appear, as validMoves uses `.includes('p1')` which will still work for kings
+
+strangely, when we click the available move, our king turns back into a `'p1'`, which is due to our movement logic assuming the piece to not be a king.
+
+let's fix these bugs first, then add the king movement feature and becoming king logic.
+
+./src/Piece.js
+```js
+import React from 'react';
+
+const glyphColors = {
+  p1: 'grey',
+  'p1-king': 'grey',
+  p2: 'green',
+  move: 'yellow',
+  king: 'gold',
+};
+
+const glyphSizes = {
+  p1: 20,
+  'p1-king': 20,
+  p2: 20,
+  move: 5,
+  king: 9,
+};
+
+export default ({
+  glyph='circle'
+})=> (
+  <svg className='Piece' viewBox='0 0 100 100'>
+    <circle r={glyphSizes[glyph]} cx={50} cy={50} fill={glyphColors[glyph]}/>
+    {glyph.includes('king') ? (
+       <circle r={glyphSizes.king} cx={50} cy={50} fill={glyphColors.king}/>
+    ) : null}
+  </svg>
+);
+```
 
 
 

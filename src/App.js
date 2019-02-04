@@ -23,7 +23,7 @@ class App extends Component {
     if( !selectedPiece && !selectedMove ) return;
     if( jumpingPiece && selectedPiece ) return;
     
-    if(selectedPiece && selectedPiece === this.state.turn){
+    if(selectedPiece && selectedPiece.includes(this.state.turn)){
       const moves = validMoves(this.state.pieces, col, row);
       
       this.setState({ moves, selectedPiece: [col, row] });
