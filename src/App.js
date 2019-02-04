@@ -3,18 +3,8 @@ import './App.css';
 
 import Board from './Board';
 
-import { validMoves } from './util';
+import { validMoves, initCheckersBoard } from './util';
 
-const initCheckersBoard = [
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
-  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
-];
 
 class App extends Component {
   state = {

@@ -28,6 +28,17 @@ export const validMoves = (pieces, col, row, isJumping)=>{
   
   valid.forEach(([c, r])=> (moves[c][r] = true));
 
-  moves.any = !!valid.length;
+  moves.any = valid.length;
   return moves;
 };
+
+export const initCheckersBoard = [
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+];

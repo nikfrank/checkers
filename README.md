@@ -342,7 +342,7 @@ if there is a jumping move available, non-jumping moves are filtered out
 
 opponent's pieces jumped in the middle of a turn are not removed until the end of the turn.
 
-player may end turn if he has jumped his piece back to a space the piece was on previously (ko)
+player may end turn at any time while jumping with a king (ko).
 ```
 
 in order to keep our user experience simple, we will show only the 'single jump' moves on the board
@@ -643,7 +643,7 @@ export const validMoves = (pieces, col, row, isJumping)=>{
 //...
 
   const valid = (jumpMoves.length ? jumpMoves : isJumping ? [] : nonjumpMoves);
-  moves.any = !!valid.length;
+  moves.any = valid.length;
 ```
 
 now we can finish multi-jump for non king pieces
@@ -690,14 +690,134 @@ else if(selectedMove){
 
 `$ touch ./src/util.test.js`
 
+./src/util.test.js
+```js
+import { validMoves } from './util';
+
+it('should allow non-jump moves', ()=>{
+  
+});
+
+it('should allow jump moves and not non-jump moves', ()=>{
+  
+});
+```
+
+now we can write some test cases for our `validMoves` function, to be sure it returns the correct moves
+
+let's copy the `initPieces` from App.js into util to use for testing non-jump moves
+
+./src/App.js
+```js
+import { validMoves, initCheckersBoard } from './util';
+
+//...
+```
+
+./src/util.js
+```js
+//...
+
+export const initCheckersBoard = [
+  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  // etc
+];
+```
+
+```js
+import { validMoves, initCheckersBoard } from './util';
+
+it('should allow non-jump moves', ()=>{
+  const edgeMoves = validMoves( initCheckersBoard, 0, 2, !'jumping' );
+  expect( edgeMoves.any ).toEqual( 1 );
+  expect( edgeMoves[1][3] ).toEqual( true );
+  expect( edgeMoves[0][3] ).toEqual( false );
+
+  const backMoves = validMoves( initCheckersBoard, 1, 1 );
+  expect( backMoves.any ).toEqual( 0 );
+
+  const middleMoves = validMoves( initCheckersBoard, 2, 2 );
+  expect( middleMoves.any ).toEqual( 2 );
+});
+```
+
+
+
 remember all create-react-app made applications can use `npm run test` to run jest tests (which looks for files *.test.js)
 
 `npm run test`
 
 
+now that the tests are running (we can break them just to see that they work lol!), let's write our jumping cases
+
+we'll start by copying the board. Then we'll pretend to move pieces and see which moves would be allowed
+
+./src/util.test.js
+```js
+///
+
+it('should allow jump moves and not non-jump moves', ()=>{
+  const pieces = JSON.parse( JSON.stringify( initCheckersBoard ) );
+
+  // pretend to play
+  pieces[1][5] = null;
+  pieces[2][4] = 'p2';
+
+  // here if it were p2's turn [2][4] could move to [3][3] or [1][3]
+  const nonjumpMoves = validMoves(pieces, 2, 4);
+
+  expect( nonjumpMoves.any ).toEqual( 2 );
+  expect( nonjumpMoves[0][2] ).toEqual( false );
+  expect( nonjumpMoves[3][3] ).toEqual( true );
+  expect( nonjumpMoves[1][3] ).toEqual( true );
+
+
+  // p1 sacrifices a piece
+  pieces[0][2] = null;
+  pieces[1][3] = 'p1';
+  
+  // now p2 should be able to jump from [2][4] the p1 on [1][3] to [0][2]
+  // and should not be able to move to [3][3]
+
+  const jumpMoves = validMoves(pieces, 2, 4);
+
+  expect( jumpMoves.any ).toEqual( 1 );
+  expect( jumpMoves[0][2] ).toEqual( true );
+  expect( jumpMoves[3][3] ).toEqual( false );
+});
+```
+
+testing `isJumping` mode:
+
+the only difference in `isJumping` mode is that when no jumps are available, non-jump moves are not valid
+
+
+./src/util.test.js
+```js
+//...
+
+it('should not allow non-jumps while already jumping', ()=>{
+  const noMoves = validMoves( initCheckersBoard, 0, 2, 'jumping' );
+  expect( noMoves.any ).toEqual( 0 );
+});
+```
+
+here, we're pretending that the front left piece already jumped to get to the starting position... all we need to test is that `isJumping` doesn't allow non-jump moves, so this will be sufficient for now.
+
+
 
 
 #### king moves (tdd)
+
+in `this.state.pieces` we've been using `'p1'` and `'p2'` for pieces and `null` for empty squares
+
+now we'll need to add kings to the specification
+
+let's take advantage of the `.includes` expressions we wrote earlier by using `'p1-king'` and `'p2-king'` for kings
+
+this will also make it pretty easy to know what's going on.
+
+
 
 
 
