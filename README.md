@@ -25,7 +25,7 @@ if you can't explain it to freshmen, you don't understand it well enough
 
 - make a board Component
 - render game pieces onto the board
-- take `onClick` from `<Board pieces={this.state.pieces} />
+- take `onClick` from `<Board pieces={this.state.pieces} />`
 - calculate legal checkers moves, test
   - render legal checkers moves as piece on `Board`
 - move pieces, giving each player his turn
@@ -132,6 +132,8 @@ export default ({
   background-color: black;
 }
 ```
+
+[read about nth child selectors](https://www.google.com/search?q=nth+child+css)
 
 
 ./src/App.js
@@ -347,7 +349,9 @@ in order to keep our user experience simple, we will show only the 'single jump'
 
 when a second jump is available, the player will be presented withose options once he has chosen his first jump.
 
-his turn will end once there are no more moves available.
+his turn will end once there are no more moves available or he uses the ko rule when jumping with a king.
+
+if a player has no pieces or no valid moves, he loses.
 
 
 ---
@@ -424,7 +428,7 @@ export default ({
 ```
 
 
-### click on "available move" space to trigger game board update
+#### click on "available move" space to trigger game board update
 
 ./src/App.js
 ```js
@@ -458,7 +462,7 @@ export default ({
 
 great, now we can repeatedly move our pieces around.
 
-
+This still isnt' a game though, as only one player can move and there's no way to win!
 
 
 
@@ -470,19 +474,68 @@ great, now we can repeatedly move our pieces around.
     if(selectedPiece && selectedPiece === this.state.turn){
       const direction = selectedPiece === 'p1' ? 1 : -1;
       
-      // start with two possible moves, filter out if off-board or occupado
-      const validMoves = [ [col+1, row+direction], [col-1, row+direction] ]
 
+      // calculate valid non-jumping moves
+      // start with two possible moves, filter out if off-board or occupado
+      const nonjumpMoves = [ [col+1, row+direction], [col-1, row+direction] ]
+        .filter(([c, r])=> (
+          c >= 0 && c <= 7 &&
+          r >= 0 && r <= 7 &&
+          !this.state.pieces[c][r]
+        ))
 //...
 
       pieces[col][row] = this.state.turn;
 
+      // if turn is over...
       this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
 ```
 
 
 
-#### jumps, keep jumping
+#### jumps
+
+```js
+    const otherPlayer = this.state.turn.includes('p1') ? 'p2' : 'p1';
+
+      // compute list of valid jump moves, if any
+      // start with two possible moves, filter out off-board, occupado, no piece to jump
+      const jumpMoves = [ [col+2, row + 2*direction], [col-2, row + 2*direction] ]
+        .filter(([c, r])=> (
+          c >= 0 && c <= 7 &&
+          r >= 0 && r <= 7 &&
+          !this.state.pieces[c][r] &&
+          (this.state.pieces[ (c + col)/2 ][ (r + row)/2 ]||'').includes(otherPlayer)
+        ));
+
+      (jumpMoves.length ? jumpMoves : nonjumpMoves).forEach(([c, r])=> (moves[c][r] = true));
+
+```
+
+at move selected
+
+```js
+      let pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
+
+      pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
+
+      if( Math.abs( col - this.state.selectedPiece[0] ) === 2 ){
+        // jumping
+        pieces[ (col + this.state.selectedPiece[0])/2 ][(row + this.state.selectedPiece[1])/2 ] += '-jumped';
+      }
+      
+      pieces[col][row] = this.state.turn;
+
+
+      // if turn is over...
+      pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
+      
+      this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
+
+```
+
+
+#### keep jumping (calculate if move is over)
 
 
 
