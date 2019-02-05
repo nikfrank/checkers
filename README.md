@@ -267,7 +267,7 @@ the elements panel will let you see all the `div`s we generated in ./src/Board.j
 
 great, our board looks fantastic, let's put pieces on it
 
-
+---
 
 
 #### render game pieces onto the board
