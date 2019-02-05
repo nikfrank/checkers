@@ -65,11 +65,59 @@ the default react app will now be running in your browser at [localhost:3000](ht
 it will be convenient to open another shell (mac: "terminal", windows: "git bash") to do the commands while devving, so the server can be left running the entire time (with automatic refreshing for live updates!)
 
 
+### git
+
+each section of the course notes is a good size for a git commit
+
+anyone seriously interested in professional js dev should make a github repo to push work to while learning!
+
+
 ### 2p local game
 
-#### make a board Component
+#### make a Board Component
 
 `$ touch ./src/Board.js`
+`$ touch ./src/Board.css`
+
+let's render the Board already!
+
+./src/App.js
+```js
+import React, { Component } from 'react';
+import './App.css';
+import Board from './Board';
+
+class App extends Component {
+  render(){
+    return (
+      <div className='App'>
+        <Board />
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+./src/App.css
+```css
+.App {
+  text-align: center;
+  width: 100%;
+}
+
+/* we can delete the rest of this file! */
+```
+
+
+ok, we get an error that Board doesn't exist. That makes sense... let's make the Board Component then:
+
+```
+the Board is a wee bit advanced syntax-wise, so it may be worth copy-pasting now and reviewing later
+
+the main learning of this workshop is the user interaction game flow, so keep your focus for that if need be.
+```
 
 ./src/Board.js
 ```js
@@ -93,7 +141,62 @@ export default ({
 );
 ```
 
-`$ touch ./src/Board.css`
+what is that???
+
+let's walk through it line by line
+
+- import React; we need to do this whenever we use JSX tags in a file
+- import './Board.css'; we'll make this file next to colour the board
+- 
+- export default ({ ... })=> ( <JSX/> );
+  - we are exporting a function which will define what is a `<Board />`
+  - [React's docs about function components](https://reactjs.org/docs/components-and-props.html)
+    - these docs don't use [fat arrows](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions) (=>) or [destructuring + default values](http://2ality.com/2015/01/es6-destructuring.html) ({ propName })
+    - fat arrows and destructuring are great, default values are useful here
+    - so you can read both pages and put two and two together!
+- ({ size=8 })=> ...
+  - we are destructuring `size` from the Board Component's props
+  - when we render `<Board />` later size will default to 8
+  - if we render `<Board size={12} />`, the size prop will be 12 and will ignore the default value
+- ({ pieces=[[]] })=> ...
+  - we are destructuring `pieces` from the Board Component's props
+  - we will represent the board as a two dimensional array
+  - it is convenient to default to an empty 2D array `[[]]` so we won't throw any silly null pointer bugs
+- ({ ...props })=> ( <JSX />)
+  - this is the pattern for a simple Component in React (which doesn't use `state`, only props)
+    - `props => (<JSX/>)`
+  - the first (parens) are around the parameters
+    - we have one param `props` which we destructure
+    - props originially may have looked like `{ size: 12, pieces: [[ 'p1', null ], [null, 'p2']] }`
+    - we destructure `size` and `pieces` directly into variables
+  - the second (parens) after the `=>` fat arrow wrap an expression
+    - fat arrows can be "one line functions" which evaluate an expression and return it
+    - here the expression we're evaluating is a bunch of JSX
+    - React will take the JSX we return, convert it to real HTML elements and put it in the document for us
+- `<div className='Board'>`
+  - JSX gives us all the standard HTML elements
+  - it does change `class='Board'` to `className='Board'` as `class` is a reserved word in js
+  - we will style the board using `.Board { ... }` in our CSS in the next step
+- `{Array(size).fill(0).map((_, rowIndex)=> ( <JSX/> ))}`
+  - we start by breaking out of HTML mode using curlies `{ ... }`
+  - [React's docs on JSX](https://reactjs.org/docs/introducing-jsx.html)
+  - now we get to write a single js expression, which should evaluate to JSX or a string
+    - that string (TextNode) or JSX will be the child of the `div` we already made
+  - we want to [generate an array from scratch](https://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n)
+  - if you write Python: yes, [list comprehension](https://www.pythonforbeginners.com/basics/list-comprehensions-in-python) is nicer in Python.
+  - we [.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) the array
+  - `(_, rowIndex)=> ( <JSX /> )`
+    - ignoring the `0` we filled the array with `_`, using the index param as `rowIndex`
+    - we return a `<div key={'row'+rowIndex} className='BoardRow'>` for every element in the array
+      - `key` is a special [React prop](https://reactjs.org/docs/lists-and-keys.html) which is the unique id for elements in loops
+      - we can style each row using `.BoardRow { ... }` in our CSS in the next step
+  - inside the row, we nest another copy of the loop to put `size` number of cells into each of our `size` number of rows
+- then we close all our brackets... non-js people love this part!
+
+what is important to realize here is that when we get to the .BoardCell div in the middle, we have `colIndex` and `rowIndex`, so we'll be able to render each square (and any piece on it) on the board based on that
+
+
+now that we have a bunch of divs, let's style them to look like a checkers board
 
 ./src/Board.css
 ```css
@@ -115,12 +218,13 @@ export default ({
   width: 100%;
   display: flex;
   flex-direction: row;
-  height: 12.5%;
+  flex-grow: 1;
 }
 
 .Board .BoardRow .BoardCell {
-  height: 100%;
-  width: 12.5%;
+  position: relative;
+  min-height: 100%;
+  flex-grow: 1;
 }
 
 .Board .BoardRow:nth-child(2n) .BoardCell:nth-child(2n) {
@@ -132,35 +236,33 @@ export default ({
 }
 ```
 
+first, we're fixing the board to be in the middle of most of the screen
+
+if `display: flex;` is new to you, [css tricks has a great cheat sheet](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+
+our Board will be two nested flex boxes, the Board contains rows, each row contains cells
+
+`flex-grow` will size our rows to take up equal shares of the Board's height, and our cells to take an equal share of the row's width
+
+BoardCell needs `min-height` because css won't give a height to an empty div
+
+
 [read about nth child selectors](https://www.google.com/search?q=nth+child+css)
 
+here we want to select (even, even) and (odd, odd) coordinate squares to colour black
 
-./src/App.js
-```js
-import Board from './Board';
+(even, odd) and (odd, even) will remain brick red `#911` as is the `background-color` of the Board
 
-//...
+[css tricks again has a great article on css colours](https://css-tricks.com/8-digit-hex-codes/) definitely worth a look!
 
-render(){
-  return (
-    <div className='App'>
-      <Board />
-    </div>
-  );
-}
-```
 
-./src/App.css
-```css
-.App {
-  text-align: center;
-  width: 100%;
-}
+**anyone who copy pasted** (or anyone interested): once this is running in the browser, it is very interesting to inspect it from chrome's devtools
 
-/* we can delete the rest of this file! */
-```
+the elements panel will let you see all the `div`s we generated in ./src/Board.js, and hovering the tags will give you a sense for how the CSS works
 
-great, our board looks fantastic
+
+great, our board looks fantastic, let's put pieces on it
+
 
 
 
@@ -212,9 +314,9 @@ export default ({
       <div key={'row'+rowIndex} className='BoardRow'>
         {Array(size).fill(0).map((_, colIndex)=> (
           <div key={'cell'+rowIndex+','+colIndex} className='BoardCell'>
-            {pieces[colIndex] && pieces[colIndex][rowIndex] ? (
+
                <Piece glyph={pieces[colIndex][rowIndex]} />
-            ) : null}
+
           </div>
         ) )}
       </div>
@@ -871,7 +973,7 @@ export default ({
 })=> (
   <svg className='Piece' viewBox='0 0 100 100'>
     <circle r={glyphSizes[glyph]} cx={50} cy={50} fill={glyphColors[glyph]}/>
-    {glyph.includes('king') ? [
+    {(glyph||'').includes('king') ? [
        <circle r={glyphSizes.king + 3} cx={50} cy={50} fill={glyphColors.king} key='ring'/>,
        <circle r={glyphSizes.king} cx={50} cy={50} fill={glyphColors[glyph]} key='fill'/>
     ] : null}

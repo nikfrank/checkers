@@ -27,7 +27,7 @@ export default ({
 })=> (
   <svg className='Piece' viewBox='0 0 100 100'>
     <circle r={glyphSizes[glyph]} cx={50} cy={50} fill={glyphColors[glyph]}/>
-    {glyph.includes('king') ? [
+    {(glyph||'').includes('king') ? [
        <circle r={glyphSizes.king + 3} cx={50} cy={50} fill={glyphColors.king} key='ring'/>,
        <circle r={glyphSizes.king} cx={50} cy={50} fill={glyphColors[glyph]} key='fill'/>
     ] : null}

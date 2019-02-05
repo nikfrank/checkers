@@ -16,9 +16,7 @@ export default ({
           <div key={'cell'+rowIndex+','+colIndex}
                onClick={()=> onClick(colIndex, rowIndex)}
                className='BoardCell'>
-            {pieces[colIndex] && pieces[colIndex][rowIndex] ? (
                <Piece glyph={pieces[colIndex][rowIndex]}/>
-            ) : null}
             {moves[colIndex] && moves[colIndex][rowIndex] ? (
                <Piece glyph='move' />
             ) : null}
