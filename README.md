@@ -31,6 +31,7 @@ if you can't explain it to freshmen, you don't understand it well enough
 - click on "available move" space to trigger game board update (move pieces)
 - giving each player his turn
 - jumps
+  - refactor the algorithm
   - keep jumping (calculate if move is over)
 - testing our game logic
 - rendering the king
@@ -410,7 +411,7 @@ export default App;
 
 export default ({
   size=8,
-  onClick=(()=>0),
+  onClick=(()=>0),  // this default value is a function that does nothing, or else we might get a "undefined is not a function"
   pieces=[[]],
 })=> (
 //...
@@ -428,6 +429,8 @@ now we can start the game logic
 #### calculate legal checkers moves, test
 
 now, in our `onClickCell` function, we can respond to the input by displaying legal moves on the board
+
+so we're ready to write our first (little) algorithm - listing valid moves
 
 when writing an algorithm (even simple ones like this) I like to do some pseudo code first
 
@@ -457,16 +460,19 @@ if there is a jumping move available, non-jumping moves are filtered out
 opponent's pieces jumped in the middle of a turn are not removed until the end of the turn.
 
 player may end turn at any time while jumping with a king (ko).
+
+some people say "if ANY of your pieces can capture you must"... that's not how I learned the game as a kid.
+
+Feel free to code that though eh!
 ```
 
 in order to keep our user experience simple, we will show only the 'single jump' moves on the board
 
-when a second jump is available, the player will be presented withose options once he has chosen his first jump.
+when a second jump is available, the player will be presented withose options once he has chosen his first jump, and must jump.
 
 his turn will end once there are no more moves available or he uses the ko rule when jumping with a king.
 
-if a player has no pieces or no valid moves, he loses.
-
+if a player has no pieces or no valid moves at the beginning of his turn, he loses.
 
 ---
 
@@ -495,6 +501,15 @@ if a player has no pieces or no valid moves, he loses.
   }
 ```
 
+`onClickCell`, when written this way: `onClickCell = ()=> { ... }` inside the `class` will be available as `this.onClickCell(...)`
+
+here we read the piece which was clicked
+
+if there isn't a piece there, don't need to do anything
+
+then we calculate all possible moves, and update the state with them
+
+`this.setState({ moves })` is the same as `this.setState({ moves: moves })` which will save our calculated value to `this.state.moves`
 
 
 ##### render legal checkers moves as piece on `Board`
@@ -524,6 +539,8 @@ export default ({
 );
 ```
 
+good thing we programmed those colors and sizes into a dictionary pattern... that made it really easy to extend
+
 ./src/Board.js
 ```js
 //...
@@ -535,11 +552,32 @@ export default ({
 
 
 //...
-            {moves[colIndex] && moves[colIndex][rowIndex] ? (
-               <Piece glyph='move' />
-            ) : null}
+            <Piece glyph={pieces[colIndex][rowIndex]}/>
+            <Piece glyph={(moves[colIndex]||[])[rowIndex] && 'move'} />
 
 ```
+
+here, after we've rendered the Piece (if any), we render the move dot
+
+we need to do `(moves[colIndex]||[])[rowIndex]` in stead of just `moves[colIndex][rowIndex]` because moves[colIndex] might not exist, which will then throw a 'cannot read index 0 of undefined' bug
+
+|| in js is a bit different than just "boolean OR"... it's more like "if the left is truthy use it, if it's falsy use the right side", so we can use it as a default operator when we want.
+
+&& in js is also a bit different than "boolean AND" in a similar way... "if the left is truthy use the right, if the left is falsy use the left"
+
+so together, we read (the move value or undefined), which if truthy (undefined is falsy) will use 'move' as the evaluated outcome of the expression. So then the Piece component will get 'move' to render the yellow dot when it should, and some falsy value otherwise (which Piece knows to render nothing for)
+
+./src/App.js
+```js
+//...
+
+        <Board pieces={this.state.pieces} moves={this.state.moves} onClick={this.onClickCell}/>
+```
+
+finally we pass the moves 2D array to the Board component from our `App`s `state`
+
+now we should be able to click on pieces and see the available non-jump moves, so next we'll want to be able to move them
+
 
 
 #### click on "available move" space to trigger game board update
@@ -574,9 +612,12 @@ export default ({
   }
 ```
 
+note that I've renamed `selected` to `selectedPiece` in order to differentiate it from `selectedMove` which describes if or if not a square can be moved to.
+
+
 great, now we can repeatedly move our pieces around.
 
-This still isnt' a game though, as only one player can move and there's no way to win!
+This still isn't a game though, as only one player can move and there's no way to win!
 
 
 
@@ -599,16 +640,31 @@ This still isnt' a game though, as only one player can move and there's no way t
         ))
 //...
 
+      pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
       pieces[col][row] = this.state.turn;
 
       // if turn is over...
       this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
 ```
 
+here we create the turn toggling effect with a ternary operator - what fun!
+
+now if we can just get the jumping working, we'll almost have a game
 
 
 #### jumps
 
+jumping and moving are really the same thing
+
+we'll need to compute different spaces, and make more changes when the user picks it - but the flow is exactly the same
+
+- click a piece
+- compute valid moves
+- show the user the valid moves
+- user clicks a valid move
+- update `this.state.pieces` based on the selections
+
+./src/App.js
 ```js
       const otherPlayer = (selectedPiece === 'p1') ? 'p2' : 'p1';
       
@@ -622,6 +678,7 @@ This still isnt' a game though, as only one player can move and there's no way t
           (this.state.pieces[ (c + col)/2 ][ (r + row)/2 ]||'').includes(otherPlayer)
         ));
 
+      // this is how we force the piece to jump if it can
       (jumpMoves.length ? jumpMoves : nonjumpMoves).forEach(([c, r])=> (moves[c][r] = true));
 
 ```
@@ -641,15 +698,19 @@ at move selected
       pieces[col][row] = this.state.turn;
 
 
-      // if turn is over...
+      // if turn is over... remove the jumped pieces from the board
       pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
       
       this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
 
 ```
 
+and that's it.
 
-##### keep jumping (calculate if move is over)
+now that our game (almost) works,  we can  start cleaning up our code
+
+
+##### refactor the algorithm
 
 let's refactor our valid moves logic into a utility function, which we can reuse and test
 
@@ -659,7 +720,7 @@ let's refactor our valid moves logic into a utility function, which we can reuse
 ./src/util.js
 ```js
 export const validMoves = (pieces, col, row, turn)=>{
-  
+  // we'll fill this in in a bit
 }
 ```
 
@@ -708,6 +769,8 @@ export const validMoves = (pieces, col, row)=>{
   return moves;
 };
 ```
+
+##### keep jumping (calculate if move is over)
 
 now we can reuse this logic in the (selectedMove) section to determine if the move is over
 

@@ -11,18 +11,16 @@ export default ({
 })=> (
   <div className='Board'>
     {Array(size).fill(0).map((_, rowIndex)=> (
-      <div key={'row'+rowIndex} className='BoardRow'>
-        {Array(size).fill(0).map((_, colIndex)=> (
-          <div key={'cell'+rowIndex+','+colIndex}
-               onClick={()=> onClick(colIndex, rowIndex)}
-               className='BoardCell'>
-               <Piece glyph={pieces[colIndex][rowIndex]}/>
-            {moves[colIndex] && moves[colIndex][rowIndex] ? (
-               <Piece glyph='move' />
-            ) : null}
-          </div>
-        ) )}
+    <div key={'row'+rowIndex} className='BoardRow'>
+      {Array(size).fill(0).map((_, colIndex)=> (
+      <div key={'cell'+rowIndex+','+colIndex}
+           onClick={()=> onClick(colIndex, rowIndex)}
+           className='BoardCell'>
+        <Piece glyph={pieces[colIndex][rowIndex]}/>
+        <Piece glyph={(moves[colIndex]||[])[rowIndex] && 'move'} />
       </div>
+      ) )}
+    </div>
     ))}
   </div>
 );
