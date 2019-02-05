@@ -86,7 +86,8 @@ class App extends Component {
     const lost = pieces.reduce( (losingGame, rowOfPieces, colIndex)=>(
       rowOfPieces.reduce( (losing, piece, rowIndex)=> (
         losing && (
-          !(piece||'').includes(turn) ||
+          !piece ||
+          !piece.includes(turn) ||
           !validMoves(pieces, colIndex, rowIndex, !'jumping').any
         )
       ), losingGame)

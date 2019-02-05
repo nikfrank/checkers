@@ -26,43 +26,43 @@ if you can't explain it to freshmen, you don't understand it well enough
 - render game pieces onto the board
 - take `onClick` from `<Board pieces={this.state.pieces} />`
 - calculate legal checkers moves, test
+  - calculate valid non-jump moves
   - render legal checkers moves as piece on `Board`
-- move pieces, giving each player his turn
+- click on "available move" space to trigger game board update (move pieces)
+- giving each player his turn
+- jumps
+  - keep jumping (calculate if move is over)
+- testing our game logic
+- rendering the king
+- king moves (tdd)
+  - calculate validMoves for kings
+  - ending multijump for kings
+  - becoming a king
 - calculate when the game has ended, test
 
-2. 1p v cp local
 
-- select cp game or 2p local game
-- onUpdate lifecycle -> trigger cp play
-- algorithm for selecting move, test
 
-3. 2p over network
+### getting started
 
-- assume game server exists
-- create a user UX
-- signin UX
-- create game UX
-- join game UX
-- use network hook to send my moves & load other player's moves
-- chat?
+`$ cd code`
+`$ create-react-app checkers`
 
-4. cloud game server
+if you don't have `create-react-app` installed
 
-- aws account
-- dynamoDB
-- POST /user
-  - apiGateway, lambda, dynamo table + create call
-- /login -> JWT
-  - apiGateway, lambda, dynamo check call
-- POST /game
-  - apiGateway + JWT authorizer, lambda, dynamo table + create call
-- /joinTable
-  - apiGateway, lambda, dynamo update call
-- PUT /game { move }
-  - apiGateway, lambda, dynamo update call
-- GET /game/:id
-  - apiGatewat, lambda, dynamo read call
-- chat?
+`$ npm i -g create-react-app`
+
+this may require `sudo` on linux / mac, or "run git bash as administrator" on windows
+
+if you don't have `npm`, it comes with `node` (google: install nodejs)
+
+after `create-react-app` is done running
+
+`$ cd checkers`
+`$ npm start`
+
+the default react app will now be running in your browser at [localhost:3000](http://localhost:3000)
+
+it will be convenient to open another shell (mac: "terminal", windows: "git bash") to do the commands while devving, so the server can be left running the entire time (with automatic refreshing for live updates!)
 
 
 ### 2p local game
@@ -356,7 +356,7 @@ if a player has no pieces or no valid moves, he loses.
 ---
 
 
-#### calculate valid non-jump moves
+##### calculate valid non-jump moves
 
 ./src/App.js
 ```js
@@ -382,7 +382,7 @@ if a player has no pieces or no valid moves, he loses.
 
 
 
-#### render legal checkers moves as piece on `Board`
+##### render legal checkers moves as piece on `Board`
 
 ./src/Piece.js
 ```js
@@ -534,7 +534,7 @@ at move selected
 ```
 
 
-#### keep jumping (calculate if move is over)
+##### keep jumping (calculate if move is over)
 
 let's refactor our valid moves logic into a utility function, which we can reuse and test
 
@@ -1027,8 +1027,6 @@ when the `selectedPiece` is a king, we should have 2 more
       r >= 0 && r <= 7 &&
       !pieces[c][r]
     ));
-
-  if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
 ```
 
 this will graft on to our array the backwards moves before we run our filter
@@ -1048,13 +1046,82 @@ ok, so the non jump moves test is passing now - let's do the same for the jump m
 
 lastly, in App.js, we'll need to end the turn when a jumping king clicks on himself
 
+(( this code section needs to be pared down ... there were quite a few little changes nec. to make this work pithily ))
+
+(( one such is the `tmpPiece` code, which is a fix for king ko ))
+
+(( also did some renaming to "Square" "jumpingFrom" for clarity... should be repagated through the course ))
+
+(( this copy also includes the solution for the next section on becoming a king in the middle of a turn ))
+
 ./src/App.js
 ```js
+  onClickCell = (col, row)=> {
+    const selectedPiece = this.state.pieces[col][row];
+    const selectedMove = (this.state.moves[col]||[])[row];
+    const { jumpingFrom } = this.state;
+    
+    if( !selectedPiece && !selectedMove ) return;
 
+    if(!jumpingFrom && selectedPiece && selectedPiece.includes(this.state.turn)){
+      const moves = validMoves(this.state.pieces, col, row);
+      
+      this.setState({ moves, selectedSquare: [col, row] });
+      
+    } else if(selectedMove){
+      if(selectedPiece && (col !== jumpingFrom[0] || row !== jumpingFrom[1] || !selectedPiece.includes('king'))) return;
+      
+      let jumping = false;
+      let pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
+
+      const tmpPiece = pieces[col][row];
+      pieces[col][row] = pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]] + (
+        (row === 7 || row === 0) &&
+        !pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]].includes('king') ? '-king' : ''
+      );
+      
+      pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]] = tmpPiece;
+
+      if( Math.abs( col - this.state.selectedSquare[0] ) === 2 ){
+        // jumping
+        jumping = true;
+        if( !pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ].includes('jumped') )
+          pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ] += '-jumped';
+      }
+
+
+      // if turn is over...
+      const moves = validMoves(pieces, col, row, jumping);
+
+      const turnOver = !jumping || ( jumping && !moves.any ) ||
+                       (selectedPiece && col === jumpingFrom[0] && row === jumpingFrom[1] && selectedPiece.includes('king'));
+
+      if(turnOver)
+        pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
+
+      const otherPlayer = this.state.turn === 'p1' ? 'p2' : 'p1';
+      const nextTurn = turnOver ? otherPlayer : this.state.turn;
+      const nextJumpingFrom = turnOver ? null : [col, row];
+      
+      this.setState({
+        moves: jumping ? moves : [],
+        pieces,
+        turn: nextTurn,
+        jumpingFrom: nextJumpingFrom,
+        selectedSquare: nextJumpingFrom,
+      }, ()=> turnOver && this.checkEndGame());
+    }
+```
+
+##### ending multijump for kings
+
+./src/util.js
+```js
+  if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
 ```
 
 
-#### becoming a king
+##### becoming a king
 
 when the piece will end up at the end of the board, we need to change it to 'p#-king''
 
@@ -1070,13 +1137,77 @@ when the piece will end up at the end of the board, we need to change it to 'p#-
 
 at the beginning of his turn, if a player has no valid moves or no pieces at all, he loses
 
+this is a fantastic example of using reduce to make the code legible
 
+could rename 'losing' to 'hasNoMoves'
+
+./src/App.js
+```js
+  checkEndGame = ()=>{
+    const { pieces, turn } = this.state;
+
+    // for turn, find all his pieces, find all their moves
+    // if either is `none`, he loses
+
+    const lost = pieces.reduce( (losingGame, rowOfPieces, colIndex)=>(
+      rowOfPieces.reduce( (losing, piece, rowIndex)=> (
+        losing && (
+          !piece ||
+          !piece.includes(turn) ||
+          !validMoves(pieces, colIndex, rowIndex, !'jumping').any
+        )
+      ), losingGame)
+    ), true);
+
+    this.setState({
+      winner: !lost ? null : ({ p1: 'p2', p2: 'p1' })[turn]
+    });
+  }
+```
 
 
 
 
 ---
 ---
+
+## agenda (contd)
+
+
+2. 1p v cp local
+
+- select cp game or 2p local game
+- onUpdate lifecycle -> trigger cp play
+- algorithm for selecting move, test
+
+3. 2p over network
+
+- assume game server exists
+- create a user UX
+- signin UX
+- create game UX
+- join game UX
+- use network hook to send my moves & load other player's moves
+- chat?
+
+4. cloud game server
+
+- aws account
+- dynamoDB
+- POST /user
+  - apiGateway, lambda, dynamo table + create call
+- /login -> JWT
+  - apiGateway, lambda, dynamo check call
+- POST /game
+  - apiGateway + JWT authorizer, lambda, dynamo table + create call
+- /joinTable
+  - apiGateway, lambda, dynamo update call
+- PUT /game { move }
+  - apiGateway, lambda, dynamo update call
+- GET /game/:id
+  - apiGatewat, lambda, dynamo read call
+- chat?
+
 
 
 ### computer player
