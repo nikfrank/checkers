@@ -143,7 +143,10 @@ export default ({
 
 what is that???
 
+<details>
+<summary>
 let's walk through it line by line
+</summary>
 
 - import React; we need to do this whenever we use JSX tags in a file
 - import './Board.css'; we'll make this file next to colour the board
@@ -192,6 +195,7 @@ let's walk through it line by line
       - we can style each row using `.BoardRow { ... }` in our CSS in the next step
   - inside the row, we nest another copy of the loop to put `size` number of cells into each of our `size` number of rows
 - then we close all our brackets... non-js people love this part!
+</details>
 
 what is important to realize here is that when we get to the .BoardCell div in the middle, we have `colIndex` and `rowIndex`, so we'll be able to render each square (and any piece on it) on the board based on that
 
