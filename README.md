@@ -263,7 +263,7 @@ export default App;
 ```
 
 
-#### take `onClick` from `<Board pieces={this.state.pieces} />
+#### take `onClick` from `<Board pieces={this.state.pieces} />`
 
 ./src/App.js
 ```js
