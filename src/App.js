@@ -12,11 +12,12 @@ import {
 
 class App extends Component {
   state = {
-    pieces: initCheckersBoard && kingCheckersBoard,
+    pieces: initCheckersBoard, // && kingCheckersBoard,
     selectedSquare: null,
     jumpingFrom: null,
     moves: [],
     turn: 'p1',
+    winner: null,
   }
 
   onClickCell = (col, row)=> {
@@ -48,7 +49,8 @@ class App extends Component {
       if( Math.abs( col - this.state.selectedSquare[0] ) === 2 ){
         // jumping
         jumping = true;
-        pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ] += '-jumped';
+        if( !pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ].includes('jumped') )
+          pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ] += '-jumped';
       }
 
 
@@ -76,15 +78,33 @@ class App extends Component {
   }
 
   checkEndGame = ()=>{
-    const { turn } = this.state;
+    const { pieces, turn } = this.state;
 
     // for turn, find all his pieces, find all their moves
     // if either is `none`, he loses
+
+    const lost = pieces.reduce( (losingGame, rowOfPieces, colIndex)=>(
+      rowOfPieces.reduce( (losing, piece, rowIndex)=> (
+        losing && (
+          !(piece||'').includes(turn) ||
+          !validMoves(pieces, colIndex, rowIndex, !'jumping').any
+        )
+      ), losingGame)
+    ), true);
+
+    this.setState({
+      winner: !lost ? null : ({ p1: 'p2', p2: 'p1' })[turn]
+    });
   }
 
   render() {
     return (
       <div className="App">
+        {this.state.winner ? (
+           <div className='winner'>
+             { this.state.winner } WINS!
+           </div>
+        ) : null }
         <Board pieces={this.state.pieces}
                moves={this.state.moves}
                onClick={this.onClickCell}/>

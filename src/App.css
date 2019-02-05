@@ -3,3 +3,27 @@
   width: 100%;
 }
 
+.winner {
+  position: fixed;
+  top: 30vh;
+  left: 30vw;
+  width: 40vw;
+  height: 40vh;
+  
+  background-color: #4f4;
+  animation: fadeout 5s linear 5s forwards;
+  z-index: 20;
+  padding: 20px;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 40px;
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
