@@ -141,11 +141,11 @@ export default ({
 );
 ```
 
-what is that???
-
 <details>
 <summary>
-let's walk through it line by line
+TLDR: it's a nested loop that renders `div`s
+<br/>
+click the zippy to read full explanation
 </summary>
 
 - import React; we need to do this whenever we use JSX tags in a file
@@ -196,6 +196,7 @@ let's walk through it line by line
   - inside the row, we nest another copy of the loop to put `size` number of cells into each of our `size` number of rows
 - then we close all our brackets... non-js people love this part!
 </details>
+<br/>
 
 what is important to realize here is that when we get to the .BoardCell div in the middle, we have `colIndex` and `rowIndex`, so we'll be able to render each square (and any piece on it) on the board based on that
 
@@ -217,20 +218,39 @@ now that we have a bunch of divs, let's style them to look like a checkers board
   display: flex;
   flex-direction: column-reverse;
 }
+```
 
+first, we're fixing the board to be in the middle of most of the screen
+
+if `display: flex;` is new to you, [css tricks has a great cheat sheet](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+
+
+```css
 .Board .BoardRow {
   width: 100%;
   display: flex;
   flex-direction: row;
   flex-grow: 1;
 }
+```
 
+our Board will be two nested flex boxes, the Board contains rows, each row contains cells
+
+`flex-grow` will size our rows to take up equal shares of the Board's height, and our cells to take an equal share of the row's width
+
+
+```css
 .Board .BoardRow .BoardCell {
   position: relative;
   min-height: 100%;
   flex-grow: 1;
 }
+```
 
+BoardCell needs `min-height` because css won't give a height to an empty div
+
+
+```css
 .Board .BoardRow:nth-child(2n) .BoardCell:nth-child(2n) {
   background-color: black;
 }
@@ -239,17 +259,6 @@ now that we have a bunch of divs, let's style them to look like a checkers board
   background-color: black;
 }
 ```
-
-first, we're fixing the board to be in the middle of most of the screen
-
-if `display: flex;` is new to you, [css tricks has a great cheat sheet](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
-
-our Board will be two nested flex boxes, the Board contains rows, each row contains cells
-
-`flex-grow` will size our rows to take up equal shares of the Board's height, and our cells to take an equal share of the row's width
-
-BoardCell needs `min-height` because css won't give a height to an empty div
-
 
 [read about nth child selectors](https://www.google.com/search?q=nth+child+css)
 
