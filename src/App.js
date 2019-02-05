@@ -71,8 +71,15 @@ class App extends Component {
         turn: nextTurn,
         jumpingFrom: nextJumpingFrom,
         selectedSquare: nextJumpingFrom,
-      });
+      }, ()=> turnOver && this.checkEndGame());
     }
+  }
+
+  checkEndGame = ()=>{
+    const { turn } = this.state;
+
+    // for turn, find all his pieces, find all their moves
+    // if either is `none`, he loses
   }
 
   render() {

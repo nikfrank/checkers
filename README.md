@@ -1056,7 +1056,7 @@ lastly, in App.js, we'll need to end the turn when a jumping king clicks on hims
 
 #### becoming a king
 
-when the piece will end up at the end of the board, we need to change it to 'p#-king'
+when the piece will end up at the end of the board, we need to change it to 'p#-king''
 
 ./src/App.js
 ```js
@@ -1067,6 +1067,9 @@ when the piece will end up at the end of the board, we need to change it to 'p#-
 ```
 
 #### calculate when the game has ended, test
+
+at the beginning of his turn, if a player has no valid moves or no pieces at all, he loses
+
 
 
 
