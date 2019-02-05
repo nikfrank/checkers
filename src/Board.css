@@ -20,8 +20,17 @@
 }
 
 .Board .BoardRow .BoardCell {
+  position: relative;
   height: 100%;
   width: 12.5%;
+}
+
+.Board .BoardRow .BoardCell svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .Board .BoardRow:nth-child(2n) .BoardCell:nth-child(2n) {

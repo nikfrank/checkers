@@ -3,7 +3,10 @@ import React from 'react';
 const glyphColors = {
   p1: 'grey',
   'p1-king': 'grey',
+  'p1-jumped': '#444',
   p2: 'green',
+  'p2-king': 'green',
+  'p2-jumped': '#5a0',
   move: 'yellow',
   king: 'gold',
 };
@@ -11,7 +14,10 @@ const glyphColors = {
 const glyphSizes = {
   p1: 20,
   'p1-king': 20,
+  'p1-jumped': 8,
   p2: 20,
+  'p2-king': 20,
+  'p2-jumped': 8,
   move: 5,
   king: 10,
 };

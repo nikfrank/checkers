@@ -847,7 +847,10 @@ import React from 'react';
 const glyphColors = {
   p1: 'grey',
   'p1-king': 'grey',
+  'p1-jumped': '#444',
   p2: 'green',
+  'p2-king': 'green',
+  'p2-jumped': '#5a0',
   move: 'yellow',
   king: 'gold',
 };
@@ -855,7 +858,10 @@ const glyphColors = {
 const glyphSizes = {
   p1: 20,
   'p1-king': 20,
+  'p1-jumped': 8,
   p2: 20,
+  'p2-king': 20,
+  'p2-jumped': 8,
   move: 5,
   king: 10,
 };
@@ -927,14 +933,15 @@ let's make a king-scenario board in util
 ```js
 // ... we can also put out iniCheckersBoard back to normal
 
+
 export const kingCheckersBoard = [
   [ 'p1', null, null, null, null, null, 'p1-king', null ],
   [ null, 'p1', null, 'p2', null, 'p2', null, null ],
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
   [ 'p1', null, null, null, null, null, null, null ],
-  [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
-  [ 'p1', null, 'p1', null, null, null, 'p2', null ],
+  [ null, 'p1', null, 'p2-king', null, 'p2', null, 'p2' ],
+  [ 'p1', null, null, null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
 ];
 ```
@@ -958,6 +965,7 @@ state = {
 //...
 ```
 
+we can see now that the king should be able to do a long chain jump of many pieces. Let's write a test for that:
 
 
 ./src/util.test.js
@@ -965,9 +973,98 @@ state = {
 import { validMoves, initCheckersBoard, kingCheckersBoard } from './util';
 
 //...
+
+it('should allow the king to jump any direction', ()=>{
+  const kingMoves = validMoves( kingCheckersBoard, 0, 6, !'jumping' );
+  expect( kingMoves.any ).toEqual( 1 );
+  expect( kingMoves[2][4] ).toEqual( true );
+});
+
+it('should allow the king to move any direction', ()=>{
+  const kingMoves = validMoves( kingCheckersBoard, 5, 3, !'jumping' );
+  expect( kingMoves.any ).toEqual( 4 );
+  expect( kingMoves[6][2] ).toEqual( true );
+  expect( kingMoves[6][4] ).toEqual( true );
+  expect( kingMoves[4][2] ).toEqual( true );
+  expect( kingMoves[4][4] ).toEqual( true );
+
+  const endKingMoves = validMoves( kingCheckersBoard, 5, 3, 'jumping' );
+  expect( endKingMoves.any ).toEqual( 1 );
+  expect( endKingMoves[5][3] ).toEqual( true );
+});
+```
+
+our test fails. which is what we should expect knowing that we haven't written the feature yet
+
+
+so let's write the feature
+
+where we had
+
+./src/util.js
+```js
+  const nonjumpMoves = [ [col+1, row+direction], [col-1, row+direction] ]
+    .filter(([c, r])=> (
+      c >= 0 && c <= 7 &&
+      r >= 0 && r <= 7 &&
+      !pieces[c][r]
+    ));
+```
+
+we were starting with only two possible non-jump moves
+
+when the `selectedPiece` is a king, we should have 2 more
+
+```js
+  const nonjumpMoves = [
+    [col+1, row+direction], [col-1, row+direction],
+    ...(selectedPiece.includes('king') ? [
+      [col+1, row-direction], [col-1, row-direction],
+    ] : []),
+  ]
+    .filter(([c, r])=> (
+      c >= 0 && c <= 7 &&
+      r >= 0 && r <= 7 &&
+      !pieces[c][r]
+    ));
+
+  if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
+```
+
+this will graft on to our array the backwards moves before we run our filter
+
+the filter will work the same (checks that the move is on the board and that the space is unoccupied
+
+I've used [array spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) and [ternary operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator) here in case you're wondering about the syntax
+
+
+ok, so the non jump moves test is passing now - let's do the same for the jump moves
+
+```js
+    ...(selectedPiece.includes('king') ? [
+      [col+2, row - 2*direction], [col-2, row - 2*direction],
+    ] : []),
+```
+
+lastly, in App.js, we'll need to end the turn when a jumping king clicks on himself
+
+./src/App.js
+```js
+
 ```
 
 
+#### becoming a king
+
+when the piece will end up at the end of the board, we need to change it to 'p#-king'
+
+./src/App.js
+```js
+      pieces[col][row] = pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]] + (
+        (row === 7 || row === 0) &&
+        !pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]].includes('king') ? '-king' : ''
+      );
+```
 
 #### calculate when the game has ended, test
 

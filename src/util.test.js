@@ -47,3 +47,23 @@ it('should not allow non-jumps while already jumping', ()=>{
   const noMoves = validMoves( initCheckersBoard, 0, 2, 'jumping' );
   expect( noMoves.any ).toEqual( 0 );
 });
+
+
+it('should allow the king to jump any direction', ()=>{
+  const kingMoves = validMoves( kingCheckersBoard, 0, 6, !'jumping' );
+  expect( kingMoves.any ).toEqual( 1 );
+  expect( kingMoves[2][4] ).toEqual( true );
+});
+
+it('should allow the king to move any direction', ()=>{
+  const kingMoves = validMoves( kingCheckersBoard, 5, 3, !'jumping' );
+  expect( kingMoves.any ).toEqual( 4 );
+  expect( kingMoves[6][2] ).toEqual( true );
+  expect( kingMoves[6][4] ).toEqual( true );
+  expect( kingMoves[4][2] ).toEqual( true );
+  expect( kingMoves[4][4] ).toEqual( true );
+
+  const endKingMoves = validMoves( kingCheckersBoard, 5, 3, 'jumping' );
+  expect( endKingMoves.any ).toEqual( 1 );
+  expect( endKingMoves[5][3] ).toEqual( true );
+});
