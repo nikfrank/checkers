@@ -11,6 +11,10 @@ class App extends Component {
   onWinner = winner=>
     this.setState({ winner })
 
+  cpMove = (pieces, jumpingFrom, cpPlayer='p2')=>{
+    return pieces;
+  }
+  
   render() {
     return (
       <div className="App">
@@ -21,7 +25,9 @@ class App extends Component {
         ) : (
            <Game onWinner={this.onWinner}
                  rules='strict'
-                 mode='2p'/>
+                 mode='cp'
+                 cpMove={this.cpMove}
+           />
         )}
       </div>
     );

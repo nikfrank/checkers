@@ -17,6 +17,22 @@ class Game extends Component {
     moves: [],
     turn: 'p1',
   }
+
+  componentDidUpdate(prevProps, prevState){
+    if(
+      ( this.props.mode === 'cp' && this.state.turn === 'p2' ) &&
+      ( prevState.turn !== 'p2' )
+    ) this.makeCPmove();
+  }
+
+  makeCPmove = ()=>{
+    const cpMove = this.props.cpMove(this.state.pieces, this.state.jumpingFrom);
+    console.log(cpMove);
+
+    // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
+
+    // if cp jumped and didn't finish turn, delay -> recurse.
+  }
   
   onClickCell = (col, row)=> {
     if( this.props.mode === 'cp' && this.state.turn !== 'p1' ) return;
