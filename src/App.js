@@ -5,6 +5,7 @@ import Board from './Board';
 
 import {
   validMoves,
+  strictValidMoves,
   initCheckersBoard,
   kingCheckersBoard
 } from './util';
@@ -29,7 +30,7 @@ class App extends Component {
 
     if(!jumpingFrom && selectedPiece && selectedPiece.includes(turn)){
       // strictRuleValidMoves
-      const moves = 'strict' ? validMoves(this.state.pieces, col, row) : validMoves(this.state.pieces, col, row);
+      const moves = 'strict' ? strictValidMoves(this.state.pieces, col, row) : validMoves(this.state.pieces, col, row);
       
       
       this.setState({ moves, selectedSquare: [col, row] });

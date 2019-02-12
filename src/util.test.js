@@ -1,4 +1,4 @@
-import { validMoves, initCheckersBoard, kingCheckersBoard } from './util';
+import { validMoves, strictValidMoves, initCheckersBoard, kingCheckersBoard } from './util';
 
 it('should allow non-jump moves', ()=>{
   const edgeMoves = validMoves( initCheckersBoard, 0, 2, !'jumping' );
@@ -67,4 +67,11 @@ it('should allow the king to move any direction', ()=>{
   const endKingMoves = validMoves( kingCheckersBoard, 5, 3, 'jumping' );
   expect( endKingMoves.any ).toEqual( 1 );
   expect( endKingMoves[5][3] ).toEqual( true );
+});
+
+
+// here other moves are available which ARE jumps
+it('should not allow non-jumps in strict mode', ()=>{
+  const noMoves = strictValidMoves( kingCheckersBoard, 5, 1, !'jumping' );
+  expect( noMoves.any ).toEqual( 0 );
 });

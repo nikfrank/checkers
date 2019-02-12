@@ -42,32 +42,47 @@ export const validMoves = (pieces, col, row, isJumping)=>{
   const valid = (jumpMoves.length ? jumpMoves : isJumping ? [] : nonjumpMoves);
 
   if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
-                
+  
   valid.forEach(([c, r])=> (moves[c][r] = true));
 
   moves.any = valid.length;
   return moves;
 };
 
-export const applyStrictJumpRule = (pieces, moves)=> {
+export const strictValidMoves = (pieces, col, row, isJumping)=> {
+  const selectedPiece = pieces[col][row] ||'';
+  const direction = selectedPiece.includes('p1') ? 1 : -1;
+  const otherPlayer = (selectedPiece.includes('p1')) ? 'p2' : 'p1';
 
-  // calculate jump moves for all selectedPiece.slice(0,2)'s pieces
+  const nonjumpMoves = calculateNonJumpMoves(pieces, col, row, { selectedPiece, direction });
+  const jumpMoves = calculateJumpMoves(pieces, col, row, { selectedPiece, direction, otherPlayer });
+
+
+  // calculate jump moves for all player's pieces
   // if any, only return jump moves for this piece
 
-  
-  // if any of the moves are jumping moves, no need to check      
-  // loop through Other pieces from this player, if any of them have jump moves require that these moves are jump moves
-  const col = 0;
-  const alreadyJumping = moves.reduce(( areWeJumping, colOfMoves, colIndex )=> (
-    areWeJumping || colOfMoves.filter((isMove, rowIndex)=>(
-      isMove && (Math.abs( colIndex - col ) === 2)
-    )).length
-  ), false);
+  const playerOtherPieces = pieces.reduce((otherPieces, rowOfPieces, colIndex)=>
+    [...otherPieces,
+     ...rowOfPieces.map((piece, rowIndex)=> (piece === selectedPiece ? [colIndex, rowIndex] : null))
+     .filter(i=> i)
+     .filter(([c, r])=> (c !== col || r !== row))
+    ], []);
 
-  if( alreadyJumping ) return moves;
+  const otherJumpMoves = playerOtherPieces
+    .map(([c, r])=> calculateJumpMoves( pieces, c, r, { selectedPiece: pieces[c][r], direction, otherPlayer } ))
+    .reduce((total, jumpMoves)=> total + jumpMoves.length, 0);
 
+
+  // generate "board layer" for moves as Array[8][8]
+  const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
+  const valid = (jumpMoves.length ? jumpMoves : isJumping ? [] : otherJumpMoves ? [] : nonjumpMoves);
+
+  if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
   
-  
+  valid.forEach(([c, r])=> (moves[c][r] = true));
+
+  moves.any = valid.length;
+  return moves;
 };
 
 
