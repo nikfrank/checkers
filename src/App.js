@@ -22,6 +22,8 @@ class App extends Component {
   }
 
   onClickCell = (col, row)=> {
+    const calculateMoves = 'strict' ? strictValidMoves : validMoves;
+    
     const { jumpingFrom, moves, turn, selectedSquare } = this.state;
     const selectedPiece = this.state.pieces[col][row];
     const selectedMove = (moves[col]||[])[row];
@@ -29,9 +31,8 @@ class App extends Component {
     if( !selectedPiece && !selectedMove ) return;
 
     if(!jumpingFrom && selectedPiece && selectedPiece.includes(turn)){
-      // strictRuleValidMoves
-      const moves = 'strict' ? strictValidMoves(this.state.pieces, col, row) : validMoves(this.state.pieces, col, row);
-      
+
+      const moves = calculateMoves(this.state.pieces, col, row);
       
       this.setState({ moves, selectedSquare: [col, row] });
       
@@ -53,15 +54,17 @@ class App extends Component {
       pieces[ selectedSquare[0] ][ selectedSquare[1] ] = prevClickedSquare;
 
       if( Math.abs( col - selectedSquare[0] ) === 2 ){
-        // jumping
         jumping = true;
+
+        // here apply "-jumped" tag to piece for removing it later
+        // remember though that kings can rejump pieces
         if( !pieces[ (col + selectedSquare[0])/2 ][(row + selectedSquare[1])/2 ].includes('jumped') )
           pieces[ (col + selectedSquare[0])/2 ][(row + selectedSquare[1])/2 ] += '-jumped';
       }
 
 
       // if turn is over...
-      const moves = validMoves(pieces, col, row, jumping);
+      const moves = calculateMoves(pieces, col, row, jumping);
 
       const turnOver = !jumping || ( jumping && !moves.any ) ||
                        (selectedPiece && col === jumpingFrom[0] && row === jumpingFrom[1] && selectedPiece.includes('king')) ||
