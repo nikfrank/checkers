@@ -88,5 +88,51 @@ trigger the cp
 
 ./src/Game.js
 ```js
+  componentDidUpdate(prevProps, prevState){
+    if(
+      ( this.props.mode === 'cp' && this.state.turn === 'p2' ) &&
+      ( prevState.turn !== 'p2' )
+    ) this.makeCPmove();
+  }
+
+  makeCPmove = ()=>{
+    const cpMove = this.props.cpMove(this.state.pieces, this.state.jumpingFrom);
+    console.log(cpMove);
+
+    // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
+
+    // if cp jumped and didn't finish turn, delay -> recurse.
+  }
 
 ```
+
+random decision
+
+- generate list of valid moves
+- randomly select one
+
+
+here, we'll demonstrate that our game works with a cp player, albeit not much of an intellectual.
+
+...
+
+
+
+
+use timeout to mimic player thinking
+
+
+...
+
+
+writing a minimax algorithm
+
+(hope this isn't too technical)
+
+[minimax](https://en.wikipedia.org/wiki/Minimax)
+
+- generate a tree
+- fill in leaf node's game state value
+- minimax bubble the values
+- select a move
+
