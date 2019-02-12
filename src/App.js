@@ -74,8 +74,8 @@ class App extends Component {
       if(turnOver)
         pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
 
-      const otherPlayer = this.state.turn === 'p1' ? 'p2' : 'p1';
-      const nextTurn = turnOver ? otherPlayer : this.state.turn;
+      const otherPlayer = turn === 'p1' ? 'p2' : 'p1';
+      const nextTurn = turnOver ? otherPlayer : turn;
       const nextJumpingFrom = turnOver ? null : [col, row];
       
       this.setState({
@@ -93,7 +93,8 @@ class App extends Component {
 
     // for turn, find all his pieces, find all their moves
     // if either is `none`, he loses
-
+    // can use quirks "validMoves" as endGame state is invariant on strictness of movement rules.
+    
     const lost = pieces.reduce( (losingGame, colOfPieces, colIndex)=>(
       colOfPieces.reduce( (losing, piece, rowIndex)=> (
         losing && (

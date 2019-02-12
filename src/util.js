@@ -53,6 +53,7 @@ export const strictValidMoves = (pieces, col, row, isJumping)=> {
   const selectedPiece = pieces[col][row] ||'';
   const direction = selectedPiece.includes('p1') ? 1 : -1;
   const otherPlayer = (selectedPiece.includes('p1')) ? 'p2' : 'p1';
+  const player = (selectedPiece.includes('p1')) ? 'p1' : 'p2';
 
   const nonjumpMoves = calculateNonJumpMoves(pieces, col, row, { selectedPiece, direction });
   const jumpMoves = calculateJumpMoves(pieces, col, row, { selectedPiece, direction, otherPlayer });
@@ -63,7 +64,7 @@ export const strictValidMoves = (pieces, col, row, isJumping)=> {
 
   const playerOtherPieces = pieces.reduce((otherPieces, rowOfPieces, colIndex)=>
     [...otherPieces,
-     ...rowOfPieces.map((piece, rowIndex)=> (piece === selectedPiece ? [colIndex, rowIndex] : null))
+     ...rowOfPieces.map((piece, rowIndex)=> ((piece||'').includes(player) ? [colIndex, rowIndex] : null))
      .filter(i=> i)
      .filter(([c, r])=> (c !== col || r !== row))
     ], []);

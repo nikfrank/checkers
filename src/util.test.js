@@ -75,3 +75,6 @@ it('should not allow non-jumps in strict mode', ()=>{
   const noMoves = strictValidMoves( kingCheckersBoard, 5, 1, !'jumping' );
   expect( noMoves.any ).toEqual( 0 );
 });
+
+// need a test for "king jump available, piece non-jump <BUG> still allowed"
+// king pieces were not considered "playerOtherPieces" because of strict equality check
