@@ -17,7 +17,7 @@ class Game extends Component {
     moves: [],
     turn: 'p1',
   }
-
+  
   onClickCell = (col, row)=> {
     if( this.props.mode === 'cp' && this.state.turn !== 'p1' ) return;
     
