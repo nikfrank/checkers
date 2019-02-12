@@ -109,16 +109,9 @@ class Game extends Component {
 
   render() {
     return (
-      <div className="App">
-        {this.state.winner ? (
-           <div className='winner'>
-             { this.state.winner } WINS!
-           </div>
-        ) : null }
-        <Board pieces={this.state.pieces}
-               moves={this.state.moves}
-               onClick={this.onClickCell}/>
-      </div>
+      <Board pieces={this.state.pieces}
+             moves={this.state.moves}
+             onClick={this.onClickCell}/>
     );
   }
 }
