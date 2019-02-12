@@ -21,25 +21,15 @@ class App extends Component {
   }
 
   onClickCell = (col, row)=> {
+    const { jumpingFrom, moves, turn, selectedSquare } = this.state;
     const selectedPiece = this.state.pieces[col][row];
-    const selectedMove = (this.state.moves[col]||[])[row];
-    const { jumpingFrom } = this.state;
+    const selectedMove = (moves[col]||[])[row];
     
     if( !selectedPiece && !selectedMove ) return;
 
-    if(!jumpingFrom && selectedPiece && selectedPiece.includes(this.state.turn)){
-      const moves = validMoves(this.state.pieces, col, row);
-
-      // if any of the moves are jumping moves, no need to check
-
-      moves.reduce(( areWeJumping, colOfMoves, colIndex )=> (
-        areWeJumping || colOfMoves.filter((isMove, rowIndex)=>(
-          isMove && (Math.abs( colIndex - col ) === 2)
-        )).length
-      ), false);
-      
-      // loop through Other pieces from this player, if any of them have jump moves require that these moves are jump moves
-
+    if(!jumpingFrom && selectedPiece && selectedPiece.includes(turn)){
+      // strictRuleValidMoves
+      const moves = 'strict' ? validMoves(this.state.pieces, col, row) : validMoves(this.state.pieces, col, row);
       
       
       this.setState({ moves, selectedSquare: [col, row] });
@@ -50,19 +40,22 @@ class App extends Component {
       let jumping = false;
       let pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
 
-      const tmpPiece = pieces[col][row];
-      pieces[col][row] = pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]] + (
-        (row === 7 || row === 0) &&
-        !pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]].includes('king') ? '-king' : ''
+      const prevClickedSquare = pieces[col][row];
+      
+      const prevPiece = pieces[ selectedSquare[0] ][ selectedSquare[1] ];
+      const nextPiece = prevPiece + (
+        (row === pieces.length-1 || row === 0) &&
+        !prevPiece.includes('king') ? '-king' : ''
       );
       
-      pieces[this.state.selectedSquare[0]][this.state.selectedSquare[1]] = tmpPiece;
+      pieces[col][row] = nextPiece;
+      pieces[ selectedSquare[0] ][ selectedSquare[1] ] = prevClickedSquare;
 
-      if( Math.abs( col - this.state.selectedSquare[0] ) === 2 ){
+      if( Math.abs( col - selectedSquare[0] ) === 2 ){
         // jumping
         jumping = true;
-        if( !pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ].includes('jumped') )
-          pieces[ (col + this.state.selectedSquare[0])/2 ][(row + this.state.selectedSquare[1])/2 ] += '-jumped';
+        if( !pieces[ (col + selectedSquare[0])/2 ][(row + selectedSquare[1])/2 ].includes('jumped') )
+          pieces[ (col + selectedSquare[0])/2 ][(row + selectedSquare[1])/2 ] += '-jumped';
       }
 
 
@@ -70,7 +63,9 @@ class App extends Component {
       const moves = validMoves(pieces, col, row, jumping);
 
       const turnOver = !jumping || ( jumping && !moves.any ) ||
-                       (selectedPiece && col === jumpingFrom[0] && row === jumpingFrom[1] && selectedPiece.includes('king'));
+                       (selectedPiece && col === jumpingFrom[0] && row === jumpingFrom[1] && selectedPiece.includes('king')) ||
+                       (nextPiece.includes('king') && !prevPiece.includes('king'));
+             
 
       if(turnOver)
         pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
@@ -80,7 +75,7 @@ class App extends Component {
       const nextJumpingFrom = turnOver ? null : [col, row];
       
       this.setState({
-        moves: jumping ? moves : [],
+        moves: jumping && !turnOver ? moves : [],
         pieces,
         turn: nextTurn,
         jumpingFrom: nextJumpingFrom,
