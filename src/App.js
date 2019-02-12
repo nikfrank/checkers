@@ -18,10 +18,11 @@ class App extends Component {
            <div className='winner'>
              { this.state.winner } WINS!
            </div>
-        ) : null }
-        <Game onWinner={this.onWinner}
-              rules='strict'
-              mode='2p'/>
+        ) : (
+           <Game onWinner={this.onWinner}
+                 rules='strict'
+                 mode='2p'/>
+        )}
       </div>
     );
   }
