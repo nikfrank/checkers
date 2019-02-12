@@ -29,6 +29,18 @@ class App extends Component {
 
     if(!jumpingFrom && selectedPiece && selectedPiece.includes(this.state.turn)){
       const moves = validMoves(this.state.pieces, col, row);
+
+      // if any of the moves are jumping moves, no need to check
+
+      moves.reduce(( areWeJumping, colOfMoves, colIndex )=> (
+        areWeJumping || colOfMoves.filter((isMove, rowIndex)=>(
+          isMove && (Math.abs( colIndex - col ) === 2)
+        )).length
+      ), false);
+      
+      // loop through Other pieces from this player, if any of them have jump moves require that these moves are jump moves
+
+      
       
       this.setState({ moves, selectedSquare: [col, row] });
       
@@ -83,8 +95,8 @@ class App extends Component {
     // for turn, find all his pieces, find all their moves
     // if either is `none`, he loses
 
-    const lost = pieces.reduce( (losingGame, rowOfPieces, colIndex)=>(
-      rowOfPieces.reduce( (losing, piece, rowIndex)=> (
+    const lost = pieces.reduce( (losingGame, colOfPieces, colIndex)=>(
+      colOfPieces.reduce( (losing, piece, rowIndex)=> (
         losing && (
           !piece ||
           !piece.includes(turn) ||

@@ -62,6 +62,7 @@ it('should allow the king to move any direction', ()=>{
   expect( kingMoves[6][4] ).toEqual( true );
   expect( kingMoves[4][2] ).toEqual( true );
   expect( kingMoves[4][4] ).toEqual( true );
+  expect( kingMoves[0][4] ).toEqual( false );
 
   const endKingMoves = validMoves( kingCheckersBoard, 5, 3, 'jumping' );
   expect( endKingMoves.any ).toEqual( 1 );

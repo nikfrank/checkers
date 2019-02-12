@@ -623,16 +623,17 @@ This still isn't a game though, as only one player can move and there's no way t
 
 #### giving each player his turn
 
+the players move in different directions, so we'll need to give different options when they each want to move.
 
 ./src/App.js
 ```js
     if(selectedPiece && selectedPiece === this.state.turn){
-      const direction = selectedPiece === 'p1' ? 1 : -1;
+      const direction = selectedPiece === 'p1' ? 1 : -1; // player 1 moves up, player 2 moves down
       
 
       // calculate valid non-jumping moves
       // start with two possible moves, filter out if off-board or occupado
-      const nonjumpMoves = [ [col+1, row+direction], [col-1, row+direction] ]
+      const nonjumpMoves = [ [col+1, row+direction], [col-1, row+direction] ] // row+direction is a space one row forward
         .filter(([c, r])=> (
           c >= 0 && c <= 7 &&
           r >= 0 && r <= 7 &&
@@ -643,7 +644,7 @@ This still isn't a game though, as only one player can move and there's no way t
       pieces[this.state.selectedPiece[0]][this.state.selectedPiece[1]] = null;
       pieces[col][row] = this.state.turn;
 
-      // if turn is over...
+      // if turn is over... switch whose turn it is
       this.setState({ moves: [], pieces, turn: this.state.turn === 'p1' ? 'p2' : 'p1' });
 ```
 
