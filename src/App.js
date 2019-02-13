@@ -2,17 +2,23 @@ import React, { Component } from 'react';
 import './App.css';
 
 import Game from './Game';
+import { calculateAllMoves, strictCalculateAllMoves } from './util';
 
 class App extends Component {
   state = {
     winner: null,
+    rules: 'strict',
   }
 
   onWinner = winner=>
     this.setState({ winner })
 
-  cpMove = (pieces, jumpingFrom, cpPlayer='p2')=>{
-    return pieces;
+  cpMove = (pieces, player='p2')=>{
+    return [[0, 1], [2, 3]];
+
+    const calculateMoves = this.state.rules === 'strict' ? strictCalculateAllMoves : calculateAllMoves;
+
+    // if the choice is multijump, the entire chain will be returned. Game will delay render loop
 
     // here call cpPlayer.js.cpChooseMove
 
@@ -34,7 +40,20 @@ class App extends Component {
     // multijump / king moves should be calculated to depth of 3, with each permutation considered a different move
     // this gives a branching factor of 8, which with a move depth of 4 means a search size of 4096 per king
     // hopefully this is sufficiently simple for runtime, most boards aren't nearly so complex
-    
+    // multijump for non-king is floor( (N-1)/2 ) maximum by nature anyhow, so 3 is enough for that always
+
+
+    // generate list of valid moves
+    const playerPieces = pieces.reduce((otherPieces, rowOfPieces, colIndex)=> [
+      ...otherPieces,
+      ...rowOfPieces.map((piece, rowIndex)=> ((piece||'').includes(player) ? [colIndex, rowIndex] : null))
+      .filter(i=> i)
+    ], []);
+
+    const moves = playerPieces.reduce((movesSoFar, piece)=> [
+      ...movesSoFar,
+      ...calculateMoves(pieces, piece[0], piece[1], !'jumping'),
+    ], []);
   }
   
   render() {
@@ -46,7 +65,7 @@ class App extends Component {
            </div>
         ) : (
            <Game onWinner={this.onWinner}
-                 rules='strict'
+                 rules={this.state.rules}
                  mode='cp'
                  cpMove={this.cpMove}
            />

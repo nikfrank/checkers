@@ -114,6 +114,33 @@ random decision
 
 here, we'll demonstrate that our game works with a cp player, albeit not much of an intellectual.
 
+
+##### generate list of all valid moves
+
+./src/App.js
+```js
+import { validMoves, strictValidMoves } from './util';
+
+
+const playerPieces = pieces.reduce((otherPieces, rowOfPieces, colIndex)=>
+      [...otherPieces,
+       ...rowOfPieces.map((piece, rowIndex)=> ((piece||'').includes(player) ? [colIndex, rowIndex] : null))
+       .filter(i=> i)
+      ], []);
+
+    const moves = playerPieces.reduce((movesSoFar, piece)=> [
+      ...movesSoFar,
+      ...calculateMoves(pieces, piece[0], piece[1], !'jumping'),
+    ], []);
+```
+
+but this will only generate the list of 1-depth moves
+
+for multijumps which may be available, we need to calculate deeper
+
+... refactor validMoves -> + validMovesCR, also for strict
+
+
 ...
 
 
@@ -135,4 +162,5 @@ writing a minimax algorithm
 - fill in leaf node's game state value
 - minimax bubble the values
 - select a move
+
 

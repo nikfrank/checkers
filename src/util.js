@@ -29,7 +29,7 @@ export const calculateNonJumpMoves = (pieces, col, row, { selectedPiece, directi
   ));
 
 
-export const validMoves = (pieces, col, row, isJumping)=>{
+export const validMovesCR = (pieces, col, row, isJumping)=>{
   const selectedPiece = pieces[col][row] ||'';
   const direction = selectedPiece.includes('p1') ? 1 : -1;
   const otherPlayer = (selectedPiece.includes('p1')) ? 'p2' : 'p1';
@@ -37,11 +37,18 @@ export const validMoves = (pieces, col, row, isJumping)=>{
   const nonjumpMoves = calculateNonJumpMoves(pieces, col, row, { selectedPiece, direction });
   const jumpMoves = calculateJumpMoves(pieces, col, row, { selectedPiece, direction, otherPlayer });
 
-  // generate "board layer" for moves as Array[8][8]
-  const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
   const valid = (jumpMoves.length ? jumpMoves : isJumping ? [] : nonjumpMoves);
 
   if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
+
+  return valid;
+};
+
+export const validMoves = (pieces, col, row, isJumping)=>{
+  const valid = validMovesCR(pieces, col, row, isJumping);
+  
+  // generate "board layer" for moves as Array[8][8]
+  const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
   
   valid.forEach(([c, r])=> (moves[c][r] = true));
 
@@ -49,7 +56,10 @@ export const validMoves = (pieces, col, row, isJumping)=>{
   return moves;
 };
 
-export const strictValidMoves = (pieces, col, row, isJumping)=> {
+
+
+
+const strictValidCR = (pieces, col, row, isJumping)=> {
   const selectedPiece = pieces[col][row] ||'';
   const direction = selectedPiece.includes('p1') ? 1 : -1;
   const otherPlayer = (selectedPiece.includes('p1')) ? 'p2' : 'p1';
@@ -74,18 +84,32 @@ export const strictValidMoves = (pieces, col, row, isJumping)=> {
     .reduce((total, jumpMoves)=> total + jumpMoves.length, 0);
 
 
-  // generate "board layer" for moves as Array[8][8]
-  const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
   const valid = (jumpMoves.length ? jumpMoves : isJumping ? [] : otherJumpMoves ? [] : nonjumpMoves);
 
   if( selectedPiece.includes('king') && isJumping ) valid.push( [col, row] );
-  
+
+  return valid;
+}
+
+export const strictValidMoves = (pieces, col, row, isJumping)=> {
+  const valid = strictValidCR(pieces, col, row, isJumping);
+
+  // generate "board layer" for moves as Array[8][8]
+  const moves = Array(8).fill(0).map(()=> Array(8).fill(false));
+
   valid.forEach(([c, r])=> (moves[c][r] = true));
 
   moves.any = valid.length;
   return moves;
 };
 
+export const calculateAllMoves = (pieces, player)=> {
+  
+};
+
+export const strictCalculateAllMoves = (pieces, player)=>{
+  
+}
 
 export const initCheckersBoard = [
   //  [ 'p1', null, 'p1-king', null, null, null, 'p2', null ],
