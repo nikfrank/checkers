@@ -141,6 +141,103 @@ for multijumps which may be available, we need to calculate deeper
 ... refactor validMoves -> + validMovesCR, also for strict
 
 
+./src/util.js
+```js
+export const calculateAllMoves = (pieces, player)=> {
+  const playerPieces = calculatePlayerPieces(pieces, player);
+
+  const moves = playerPieces.reduce((movesSoFar, piece)=> [
+    ...movesSoFar,
+    validMovesCR(pieces, piece[0], piece[1], !'jumping')
+      .map(move=> {
+        if( Math.abs(move[0] - piece[0]) === 1) return [piece, move];
+        else {
+          // here we have a jump, need to check for multijump
+        }
+      }),
+  ], []);
+
+};
+```
+
+to calculate the next moves on the next state of the board, we must refactor the logic which computes that from Game into a pure function (in util)
+
+by writing all of our logic pure, we'll be able to reuse all of our functions whenever we want!
+
+./src/Game.js
+```js
+  calculatePiecesAfterMove,
+
+    } else if(selectedMove){
+      if(selectedPiece && (col !== jumpingFrom[0] || row !== jumpingFrom[1] || !selectedPiece.includes('king'))) return;
+      
+      const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
+        this.state.pieces,
+        [selectedSquare, [col, row]],
+        jumpingFrom,
+        calculateMoves
+      );
+      
+      const otherPlayer = turn === 'p1' ? 'p2' : 'p1';
+      const nextTurn = turnOver ? otherPlayer : turn;
+      const nextJumpingFrom = turnOver ? null : [col, row];
+      
+      this.setState({
+        moves: jumping && !turnOver ? moves : [],
+        pieces,
+        turn: nextTurn,
+        jumpingFrom: nextJumpingFrom,
+        selectedSquare: nextJumpingFrom,
+      }, ()=> turnOver && this.checkEndGame());
+    }
+
+```
+
+./src/util.js
+```js
+export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], jumpingFrom, calculateMoves )=>{
+  let jumping = false;
+  let pieces = JSON.parse( JSON.stringify( inputPieces ) );
+
+  const prevClickedSquare = pieces[ moveTo[0] ][ moveTo[1] ];
+  
+  const prevPiece = pieces[ moveFrom[0] ][ moveFrom[1] ];
+  const nextPiece = prevPiece + (
+    (moveTo[1] === pieces.length-1 || !moveTo[0]) &&
+    !prevPiece.includes('king') ? '-king' : ''
+  );
+  
+  pieces[ moveTo[0] ][ moveTo[1] ] = nextPiece;
+  pieces[ moveFrom[0] ][ moveFrom[1] ] = prevClickedSquare;
+
+  if( Math.abs( moveTo[0] - moveFrom[0] ) === 2 ){
+    jumping = true;
+
+    // here apply "-jumped" tag to piece for removing it later
+    // remember though that kings can rejump pieces
+    if( !pieces[ (moveTo[0] + moveFrom[0])/2 ][(moveTo[1] + moveFrom[1])/2 ].includes('jumped') )
+      pieces[ (moveTo[0] + moveFrom[0])/2 ][(moveTo[1] + moveFrom[1])/2 ] += '-jumped';
+  }
+
+
+  // if turn is over...
+  const moves = calculateMoves(pieces, moveTo[0], moveTo[1], jumping);
+
+  const turnOver = !jumping || ( jumping && !moves.any ) ||
+                   
+                   (moveTo[0] === jumpingFrom[0] && moveTo[1] === jumpingFrom[1] &&
+                    (prevClickedSquare||'').includes('king')) ||
+                   
+                   (nextPiece.includes('king') && !prevPiece.includes('king'));
+  
+
+  if(turnOver)
+    pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
+
+  return { jumping, turnOver, pieces };
+};
+```
+
 ...
 
 

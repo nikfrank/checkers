@@ -14,7 +14,6 @@ class App extends Component {
     this.setState({ winner })
 
   cpMove = (pieces, player='p2')=>{
-    return [[0, 1], [2, 3]];
 
     const calculateMoves = this.state.rules === 'strict' ? strictCalculateAllMoves : calculateAllMoves;
 
@@ -44,16 +43,9 @@ class App extends Component {
 
 
     // generate list of valid moves
-    const playerPieces = pieces.reduce((otherPieces, rowOfPieces, colIndex)=> [
-      ...otherPieces,
-      ...rowOfPieces.map((piece, rowIndex)=> ((piece||'').includes(player) ? [colIndex, rowIndex] : null))
-      .filter(i=> i)
-    ], []);
 
-    const moves = playerPieces.reduce((movesSoFar, piece)=> [
-      ...movesSoFar,
-      ...calculateMoves(pieces, piece[0], piece[1], !'jumping'),
-    ], []);
+
+    return [[0, 1], [2, 3]];
   }
   
   render() {

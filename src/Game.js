@@ -4,6 +4,7 @@ import Board from './Board';
 import {
   validMoves,
   strictValidMoves,
+  calculatePiecesAfterMove,
   initCheckersBoard,
   kingCheckersBoard
 } from './util';
@@ -13,7 +14,6 @@ class Game extends Component {
   state = {
     pieces: initCheckersBoard, // && kingCheckersBoard,
     selectedSquare: null,
-    jumpingFrom: null,
     moves: [],
     turn: 'p1',
   }
@@ -26,7 +26,7 @@ class Game extends Component {
   }
 
   makeCPmove = ()=>{
-    const cpMove = this.props.cpMove(this.state.pieces, this.state.jumpingFrom);
+    const cpMove = this.props.cpMove(this.state.pieces);
     console.log(cpMove);
 
     // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
@@ -39,66 +39,34 @@ class Game extends Component {
     
     const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
     
-    const { jumpingFrom, moves, turn, selectedSquare } = this.state;
+    const { moves, turn, selectedSquare } = this.state;
     const selectedPiece = this.state.pieces[col][row];
     const selectedMove = (moves[col]||[])[row];
     
     if( !selectedPiece && !selectedMove ) return;
 
-    if(!jumpingFrom && selectedPiece && selectedPiece.includes(turn)){
-
+    if(selectedPiece && selectedPiece.includes(turn)){
       const moves = calculateMoves(this.state.pieces, col, row);
-      
       this.setState({ moves, selectedSquare: [col, row] });
       
     } else if(selectedMove){
-      if(selectedPiece && (col !== jumpingFrom[0] || row !== jumpingFrom[1] || !selectedPiece.includes('king'))) return;
+      if(selectedPiece && (col !== selectedSquare[0] || row !== selectedSquare[1] || !selectedPiece.includes('king'))) return;
       
-      let jumping = false;
-      let pieces = JSON.parse( JSON.stringify( this.state.pieces ) );
-
-      const prevClickedSquare = pieces[col][row];
-      
-      const prevPiece = pieces[ selectedSquare[0] ][ selectedSquare[1] ];
-      const nextPiece = prevPiece + (
-        (row === pieces.length-1 || row === 0) &&
-        !prevPiece.includes('king') ? '-king' : ''
+      const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
+        this.state.pieces,
+        [selectedSquare, [col, row]],
+        calculateMoves
       );
       
-      pieces[col][row] = nextPiece;
-      pieces[ selectedSquare[0] ][ selectedSquare[1] ] = prevClickedSquare;
-
-      if( Math.abs( col - selectedSquare[0] ) === 2 ){
-        jumping = true;
-
-        // here apply "-jumped" tag to piece for removing it later
-        // remember though that kings can rejump pieces
-        if( !pieces[ (col + selectedSquare[0])/2 ][(row + selectedSquare[1])/2 ].includes('jumped') )
-          pieces[ (col + selectedSquare[0])/2 ][(row + selectedSquare[1])/2 ] += '-jumped';
-      }
-
-
-      // if turn is over...
-      const moves = calculateMoves(pieces, col, row, jumping);
-
-      const turnOver = !jumping || ( jumping && !moves.any ) ||
-                       (selectedPiece && col === jumpingFrom[0] && row === jumpingFrom[1] && selectedPiece.includes('king')) ||
-                       (nextPiece.includes('king') && !prevPiece.includes('king'));
-             
-
-      if(turnOver)
-        pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
-
       const otherPlayer = turn === 'p1' ? 'p2' : 'p1';
       const nextTurn = turnOver ? otherPlayer : turn;
-      const nextJumpingFrom = turnOver ? null : [col, row];
+      const nextSelectedSquare = turnOver ? null : [col, row];
       
       this.setState({
         moves: jumping && !turnOver ? moves : [],
         pieces,
         turn: nextTurn,
-        jumpingFrom: nextJumpingFrom,
-        selectedSquare: nextJumpingFrom,
+        selectedSquare: nextSelectedSquare,
       }, ()=> turnOver && this.checkEndGame());
     }
   }

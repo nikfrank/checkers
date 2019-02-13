@@ -103,13 +103,83 @@ export const strictValidMoves = (pieces, col, row, isJumping)=> {
   return moves;
 };
 
-export const calculateAllMoves = (pieces, player)=> {
+const calculatePlayerPieces = (pieces, player)=>
+  pieces.reduce((otherPieces, rowOfPieces, colIndex)=> [
+    ...otherPieces,
+    ...rowOfPieces.map((piece, rowIndex)=> ((piece||'').includes(player) ? [colIndex, rowIndex] : null))
+    .filter(i=> i)
+  ], []);
+
+
+export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calculateMoves )=>{
+  let jumping = false;
+  let pieces = JSON.parse( JSON.stringify( inputPieces ) );
+
+  const prevClickedSquare = pieces[ moveTo[0] ][ moveTo[1] ];
   
+  const prevPiece = pieces[ moveFrom[0] ][ moveFrom[1] ];
+  const nextPiece = prevPiece + (
+    (moveTo[1] === pieces.length-1 || !moveTo[0]) &&
+    !prevPiece.includes('king') ? '-king' : ''
+  );
+  
+  pieces[ moveTo[0] ][ moveTo[1] ] = nextPiece;
+  pieces[ moveFrom[0] ][ moveFrom[1] ] = prevClickedSquare;
+
+  if( Math.abs( moveTo[0] - moveFrom[0] ) === 2 ){
+    jumping = true;
+
+    // here apply "-jumped" tag to piece for removing it later
+    // remember though that kings can rejump pieces
+    if( !pieces[ (moveTo[0] + moveFrom[0])/2 ][(moveTo[1] + moveFrom[1])/2 ].includes('jumped') )
+      pieces[ (moveTo[0] + moveFrom[0])/2 ][(moveTo[1] + moveFrom[1])/2 ] += '-jumped';
+  }
+
+
+  // if turn is over...
+  const moves = calculateMoves(pieces, moveTo[0], moveTo[1], jumping);
+
+  const turnOver = !jumping || ( jumping && !moves.any ) ||
+                   
+                   (moveTo[0] === moveFrom[0] && moveTo[1] === moveFrom[1] &&
+                    (prevClickedSquare||'').includes('king')) ||
+                   
+                   (nextPiece.includes('king') && !prevPiece.includes('king'));
+  
+
+  if(turnOver)
+    pieces = pieces.map( pieceRow => pieceRow.map( cell=> (cell||'').includes('jumped') ? null : cell ));
+
+  return { jumping, turnOver, pieces };
+};
+
+
+
+export const calculateAllMoves = (pieces, player)=> {
+  const playerPieces = calculatePlayerPieces(pieces, player);
+
+  const moves = playerPieces.reduce((movesSoFar, piece)=> [
+    ...movesSoFar,
+    validMovesCR(pieces, piece[0], piece[1], !'jumping')
+      .map(move=> {
+        if( (Math.abs(move[0] - piece[0]) === 1) || (!move[1] || move[1] === pieces.length-1) ) return [piece, move];
+        else {
+          // here we have a jump and are not at end of board, need to check for multijump
+
+          const nextPieces = calculatePiecesAfterMove( pieces, [piece, move], validMoves);
+          const nextMoves = validMovesCR(nextPieces, move[0], move[1], !!'jumping');
+        }
+      }),
+  ], []);
+
 };
 
 export const strictCalculateAllMoves = (pieces, player)=>{
+  const playerPieces = calculatePlayerPieces(pieces, player);
   
-}
+};
+
+
 
 export const initCheckersBoard = [
   //  [ 'p1', null, 'p1-king', null, null, null, 'p2', null ],
