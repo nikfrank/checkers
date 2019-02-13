@@ -164,7 +164,6 @@ export const calculateAllMoves = (pieces, player, calculateValidMoves)=> {
     ...movesSoFar,
     ...calculateMovesCR(pieces, piece[0], piece[1], !'jumping')
     .map(move=> {
-      console.log('move', move);
       if( (Math.abs(move[0] - piece[0]) === 1) || (!move[1] || move[1] === pieces.length-1) ) return [[piece, move]];
       else {
         // here we have a jump and are not at end of board, need to check for multijump

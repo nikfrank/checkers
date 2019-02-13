@@ -43,7 +43,6 @@ class App extends Component {
     // generate list of valid moves
 
     const allMoves = calculateAllMoves(pieces, 'p2', strictValidMoves);
-    console.log('valid moves', allMoves);
     
     return allMoves[0]; // pick a move
   }

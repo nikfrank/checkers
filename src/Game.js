@@ -28,7 +28,6 @@ class Game extends Component {
   makeCPmove = ()=>{
     const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
     const cpMove = this.props.cpMove(this.state.pieces);
-    console.log(cpMove);
 
     const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
       this.state.pieces,
@@ -36,9 +35,20 @@ class Game extends Component {
       calculateMoves
     );
 
-    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }), 500);
     // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
+    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }), 500);
 
+    if(!turnOver) {
+      const { turnOver: nextTurnOver, pieces: nextPieces } = calculatePiecesAfterMove(
+        pieces,
+        cpMove.slice(1),
+        calculateMoves
+      );
+
+      setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' }), 1100);
+    }
+    
+    
     // if cp jumped and didn't finish turn, delay -> recurse.
   }
   
@@ -63,13 +73,13 @@ class Game extends Component {
         [selectedSquare, [col, row]],
         calculateMoves
       );
-      
+
       const otherPlayer = turn === 'p1' ? 'p2' : 'p1';
       const nextTurn = turnOver ? otherPlayer : turn;
       const nextSelectedSquare = turnOver ? null : [col, row];
       
       this.setState({
-        moves: jumping && !turnOver ? moves : [],
+        moves: jumping && !turnOver ? calculateMoves(pieces, col, row, jumping) : [],
         pieces,
         turn: nextTurn,
         selectedSquare: nextSelectedSquare,
