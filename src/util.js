@@ -111,7 +111,7 @@ const calculatePlayerPieces = (pieces, player)=>
   ], []);
 
 
-export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calculateMoves )=>{
+export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calculateValidMoves )=>{
   let jumping = false;
   let pieces = JSON.parse( JSON.stringify( inputPieces ) );
 
@@ -119,7 +119,7 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calcul
   
   const prevPiece = pieces[ moveFrom[0] ][ moveFrom[1] ];
   const nextPiece = prevPiece + (
-    (moveTo[1] === pieces.length-1 || !moveTo[0]) &&
+    (moveTo[1] === pieces.length-1 || !moveTo[1]) &&
     !prevPiece.includes('king') ? '-king' : ''
   );
   
@@ -137,7 +137,7 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calcul
 
 
   // if turn is over...
-  const moves = calculateMoves(pieces, moveTo[0], moveTo[1], jumping);
+  const moves = calculateValidMoves(pieces, moveTo[0], moveTo[1], jumping);
 
   const turnOver = !jumping || ( jumping && !moves.any ) ||
                    
@@ -155,28 +155,29 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calcul
 
 
 
-export const calculateAllMoves = (pieces, player)=> {
+export const calculateAllMoves = (pieces, player, calculateValidMoves)=> {
   const playerPieces = calculatePlayerPieces(pieces, player);
 
+  const calculateMovesCR = calculateValidMoves === validMoves ? validMovesCR : strictValidCR;
+  
   const moves = playerPieces.reduce((movesSoFar, piece)=> [
     ...movesSoFar,
-    validMovesCR(pieces, piece[0], piece[1], !'jumping')
-      .map(move=> {
-        if( (Math.abs(move[0] - piece[0]) === 1) || (!move[1] || move[1] === pieces.length-1) ) return [piece, move];
-        else {
-          // here we have a jump and are not at end of board, need to check for multijump
+    ...calculateMovesCR(pieces, piece[0], piece[1], !'jumping')
+    .map(move=> {
+      console.log('move', move);
+      if( (Math.abs(move[0] - piece[0]) === 1) || (!move[1] || move[1] === pieces.length-1) ) return [[piece, move]];
+      else {
+        // here we have a jump and are not at end of board, need to check for multijump
 
-          const nextPieces = calculatePiecesAfterMove( pieces, [piece, move], validMoves);
-          const nextMoves = validMovesCR(nextPieces, move[0], move[1], !!'jumping');
-        }
-      }),
-  ], []);
+        const { pieces: nextPieces, turnOver } = calculatePiecesAfterMove( pieces, [piece, move], calculateValidMoves);
+        const nextMoves = validMovesCR(nextPieces, move[0], move[1], !!'jumping');
 
-};
+        return nextMoves.length ? nextMoves.map(nextMove => [piece, move, nextMove]) : [[piece, move]];
+      }
+    }).reduce((p, c)=> [...p, ...c], []),
+  ], []).filter(ms=> ms.length);
 
-export const strictCalculateAllMoves = (pieces, player)=>{
-  const playerPieces = calculatePlayerPieces(pieces, player);
-  
+  return moves;
 };
 
 

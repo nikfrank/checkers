@@ -26,9 +26,17 @@ class Game extends Component {
   }
 
   makeCPmove = ()=>{
+    const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
     const cpMove = this.props.cpMove(this.state.pieces);
     console.log(cpMove);
 
+    const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
+      this.state.pieces,
+      cpMove,
+      calculateMoves
+    );
+
+    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }), 500);
     // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
 
     // if cp jumped and didn't finish turn, delay -> recurse.
@@ -45,13 +53,11 @@ class Game extends Component {
     
     if( !selectedPiece && !selectedMove ) return;
 
-    if(selectedPiece && selectedPiece.includes(turn)){
+    if(!selectedMove && selectedPiece && selectedPiece.includes(turn)){
       const moves = calculateMoves(this.state.pieces, col, row);
       this.setState({ moves, selectedSquare: [col, row] });
       
     } else if(selectedMove){
-      if(selectedPiece && (col !== selectedSquare[0] || row !== selectedSquare[1] || !selectedPiece.includes('king'))) return;
-      
       const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
         this.state.pieces,
         [selectedSquare, [col, row]],

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 import Game from './Game';
-import { calculateAllMoves, strictCalculateAllMoves } from './util';
+import { calculateAllMoves, strictValidMoves } from './util';
 
 class App extends Component {
   state = {
@@ -14,8 +14,6 @@ class App extends Component {
     this.setState({ winner })
 
   cpMove = (pieces, player='p2')=>{
-
-    const calculateMoves = this.state.rules === 'strict' ? strictCalculateAllMoves : calculateAllMoves;
 
     // if the choice is multijump, the entire chain will be returned. Game will delay render loop
 
@@ -44,8 +42,10 @@ class App extends Component {
 
     // generate list of valid moves
 
-
-    return [[0, 1], [2, 3]];
+    const allMoves = calculateAllMoves(pieces, 'p2', strictValidMoves);
+    console.log('valid moves', allMoves);
+    
+    return allMoves[0]; // pick a move
   }
   
   render() {

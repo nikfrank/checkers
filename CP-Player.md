@@ -238,6 +238,70 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], jumpin
 };
 ```
 
+so now we can calculate all moves
+
+```js
+export const calculateAllMoves = (pieces, player)=> {
+  const playerPieces = calculatePlayerPieces(pieces, player);
+
+  const moves = playerPieces.reduce((movesSoFar, piece)=> [
+    ...movesSoFar,
+    ...validMovesCR(pieces, piece[0], piece[1], !'jumping')
+      .map(move=> {
+        if( (Math.abs(move[0] - piece[0]) === 1) || (!move[1] || move[1] === pieces.length-1) ) return [piece, move];
+        else {
+          // here we have a jump and are not at end of board, need to check for multijump
+
+          const nextPieces = calculatePiecesAfterMove( pieces, [piece, move], validMoves);
+          const nextMoves = validMovesCR(nextPieces, move[0], move[1], !!'jumping');
+
+          console.log(nextMoves);
+        }
+      }),
+  ], []).filter(ms=> ms.length);
+
+  return moves;
+};
+
+```
+
+
+
+
+
+
+and we can make a move
+
+./src/App.js
+```js
+    const allMoves = calculateMoves(pieces, 'p2');
+    console.log(allMoves);
+    
+    return allMoves[0]; // pick a move
+```
+
+
+./src/Game.js
+```js
+
+  makeCPmove = ()=>{
+    const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
+    const cpMove = this.props.cpMove(this.state.pieces);
+    console.log(cpMove);
+
+    const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
+      this.state.pieces,
+      cpMove,
+      calculateMoves
+    );
+
+    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }), 500);
+    // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
+
+    // if cp jumped and didn't finish turn, delay -> recurse.
+  }
+```
+
 ...
 
 
