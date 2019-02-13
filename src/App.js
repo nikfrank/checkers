@@ -14,7 +14,6 @@ class App extends Component {
     this.setState({ winner })
 
   cpMove = (pieces, player='p2')=>{
-
     // if the choice is multijump, the entire chain will be returned. Game will delay render loop
 
     // here call cpPlayer.js.cpChooseMove
@@ -43,8 +42,10 @@ class App extends Component {
     // generate list of valid moves
 
     const allMoves = calculateAllMoves(pieces, 'p2', strictValidMoves);
+
+    if(!allMoves.length) return; // game is over already
     
-    return allMoves[0]; // pick a move
+    return allMoves[ Math.floor(allMoves.length * Math.random()) ]; // pick a move
   }
   
   render() {

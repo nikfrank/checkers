@@ -6,7 +6,7 @@ import {
   strictValidMoves,
   calculatePiecesAfterMove,
   initCheckersBoard,
-  kingCheckersBoard
+//  kingCheckersBoard
 } from './util';
 
 
@@ -29,14 +29,16 @@ class Game extends Component {
     const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
     const cpMove = this.props.cpMove(this.state.pieces);
 
-    const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
+    if(!cpMove) return;
+    
+    const { turnOver, pieces } = calculatePiecesAfterMove(
       this.state.pieces,
       cpMove,
       calculateMoves
     );
 
     // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
-    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }), 500);
+    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }, ()=> turnOver && this.checkEndGame()), 500);
 
     if(!turnOver) {
       const { turnOver: nextTurnOver, pieces: nextPieces } = calculatePiecesAfterMove(
@@ -45,7 +47,8 @@ class Game extends Component {
         calculateMoves
       );
 
-      setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' }), 1100);
+      setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' },
+                                    ()=> nextTurnOver && this.checkEndGame()), 1100);
     }
     
     

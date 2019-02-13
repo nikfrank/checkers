@@ -158,6 +158,8 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calcul
 export const calculateAllMoves = (pieces, player, calculateValidMoves)=> {
   const playerPieces = calculatePlayerPieces(pieces, player);
 
+  if( !playerPieces.length ) return [];
+
   const calculateMovesCR = calculateValidMoves === validMoves ? validMovesCR : strictValidCR;
   
   const moves = playerPieces.reduce((movesSoFar, piece)=> [
@@ -168,7 +170,7 @@ export const calculateAllMoves = (pieces, player, calculateValidMoves)=> {
       else {
         // here we have a jump and are not at end of board, need to check for multijump
 
-        const { pieces: nextPieces, turnOver } = calculatePiecesAfterMove( pieces, [piece, move], calculateValidMoves);
+        const { pieces: nextPieces } = calculatePiecesAfterMove( pieces, [piece, move], calculateValidMoves);
         const nextMoves = validMovesCR(nextPieces, move[0], move[1], !!'jumping');
 
         return nextMoves.length ? nextMoves.map(nextMove => [piece, move, nextMove]) : [[piece, move]];
@@ -178,7 +180,6 @@ export const calculateAllMoves = (pieces, player, calculateValidMoves)=> {
 
   return moves;
 };
-
 
 
 export const initCheckersBoard = [
