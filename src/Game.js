@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import Board from './Board';
 
 import {
-  validMoves,
-  strictValidMoves,
+  validMovesForPieceOnBoard,
   calculatePiecesAfterMove,
   initCheckersBoard
 } from './util';
@@ -25,15 +24,13 @@ class Game extends Component {
   }
 
   makeCPmove = ()=>{
-    const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
     const cpMove = this.props.cpMove(this.state.pieces);
 
     if(!cpMove) return;
     
     const { turnOver, pieces } = calculatePiecesAfterMove(
       this.state.pieces,
-      cpMove,
-      calculateMoves
+      cpMove
     );
 
     // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
@@ -42,8 +39,7 @@ class Game extends Component {
     if(!turnOver) {
       const { turnOver: nextTurnOver, pieces: nextPieces } = calculatePiecesAfterMove(
         pieces,
-        cpMove.slice(1),
-        calculateMoves
+        cpMove.slice(1)
       );
 
       setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' },
@@ -57,8 +53,6 @@ class Game extends Component {
   onClickCell = (col, row)=> {
     if( this.props.mode === 'cp' && this.state.turn !== 'p1' ) return;
     
-    const calculateMoves = this.props.rules === 'strict' ? strictValidMoves : validMoves;
-    
     const { moves, turn, selectedSquare } = this.state;
     const selectedPiece = this.state.pieces[col][row];
     const selectedMove = (moves[col]||[])[row];
@@ -66,14 +60,13 @@ class Game extends Component {
     if( !selectedPiece && !selectedMove ) return;
 
     if(!selectedMove && selectedPiece && selectedPiece.includes(turn)){
-      const moves = calculateMoves(this.state.pieces, col, row);
+      const moves = validMovesForPieceOnBoard(this.state.pieces, col, row);
       this.setState({ moves, selectedSquare: [col, row] });
       
     } else if(selectedMove){
       const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
         this.state.pieces,
-        [selectedSquare, [col, row]],
-        calculateMoves
+        [selectedSquare, [col, row]]
       );
 
       const otherPlayer = turn === 'p1' ? 'p2' : 'p1';
@@ -81,7 +74,7 @@ class Game extends Component {
       const nextSelectedSquare = turnOver ? null : [col, row];
       
       this.setState({
-        moves: jumping && !turnOver ? calculateMoves(pieces, col, row, jumping) : [],
+        moves: jumping && !turnOver ? validMovesForPieceOnBoard(pieces, col, row, jumping) : [],
         pieces,
         turn: nextTurn,
         selectedSquare: nextSelectedSquare,
@@ -101,7 +94,7 @@ class Game extends Component {
         losing && (
           !piece ||
           !piece.includes(turn) ||
-          !validMoves(pieces, colIndex, rowIndex, !'jumping').any
+          !validMovesForPieceOnBoard(pieces, colIndex, rowIndex, !'jumping').any
         )
       ), losingGame)
     ), true);
