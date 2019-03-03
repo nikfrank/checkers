@@ -155,7 +155,7 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo], calcul
 
 
 
-export const calculateAllMoves = (pieces, player, calculateValidMoves)=> {
+export const calculateAllTurnOptions = (pieces, player, calculateValidMoves)=> {
   const playerPieces = calculatePlayerPieces(pieces, player);
 
   if( !playerPieces.length ) return [];

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 import Game from './Game';
-import { calculateAllMoves, strictValidMoves } from './util';
+import { calculateAllTurnOptions, strictValidMoves } from './util';
 
 class App extends Component {
   state = {
@@ -41,7 +41,7 @@ class App extends Component {
 
     // generate list of valid moves
 
-    const allMoves = calculateAllMoves(pieces, 'p2', strictValidMoves);
+    const allMoves = calculateAllTurnOptions(pieces, 'p2', strictValidMoves);
 
     if(!allMoves.length) return; // game is over already
     

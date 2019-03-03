@@ -5,8 +5,7 @@ import {
   validMoves,
   strictValidMoves,
   calculatePiecesAfterMove,
-  initCheckersBoard,
-//  kingCheckersBoard
+  initCheckersBoard
 } from './util';
 
 
