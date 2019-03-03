@@ -102,7 +102,7 @@ export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo])=>{
 
     // here apply "-jumped" tag to piece for removing it later
     // remember though that kings can rejump pieces
-    if( !pieces[ (moveTo[0] + moveFrom[0])/2 ][(moveTo[1] + moveFrom[1])/2 ].includes('jumped') )
+    if( !pieces[ (moveTo[0] + moveFrom[0])/2 ][ (moveTo[1] + moveFrom[1])/2 ].includes('jumped') )
       pieces[ (moveTo[0] + moveFrom[0])/2 ][(moveTo[1] + moveFrom[1])/2 ] += '-jumped';
   }
 
@@ -139,10 +139,23 @@ export const calculateAllTurnOptions = (pieces, player)=> {
       else {
         // here we have a jump and are not at end of board, need to check for multijump
 
-        const { pieces: nextPieces } = calculatePiecesAfterMove( pieces, [piece, move]);
+        const { pieces: nextPieces } = calculatePiecesAfterMove( pieces, [piece, move] );
         const nextMoves = strictValidCR(nextPieces, move[0], move[1], !!'jumping');
 
-        return nextMoves.length ? nextMoves.map(nextMove => [piece, move, nextMove]) : [[piece, move]];
+        if(nextMoves.length){
+          return nextMoves.map(nextMove =>{
+
+            // see if there's any third jumps
+            const { pieces: lastPieces } = calculatePiecesAfterMove( nextPieces, [move, nextMove] );
+            const lastMoves = strictValidCR(lastPieces, nextMove[0], nextMove[1], !!'jumping');
+
+            if( lastMoves.length ){
+              return lastMoves.map(lastMove => [piece, move, nextMove, lastMove]);
+              
+            } else return [[piece, move, nextMove]];
+          }).reduce((p,c)=> [...p, ...c], []);
+          
+        } else return [[piece, move]];
       }
     }).reduce((p, c)=> [...p, ...c], []),
   ], []).filter(ms=> ms.length);
@@ -169,6 +182,18 @@ export const kingCheckersBoard = [
   [ 'p1', null, 'p1', null, null, null, 'p2', null ],
   [ null, 'p1', null, 'p2', null, 'p2', null, 'p2' ],
   [ 'p1', null, null, null, null, null, null, null ],
+  [ null, 'p1', null, 'p2-king', null, 'p2', null, 'p2' ],
+  [ 'p1', null, null, null, null, null, 'p2', null ],
+  [ null, 'p1', null, null, null, 'p2', null, 'p2' ],
+];
+
+
+export const jumpyCheckersBoard = [
+  [ 'p1', null, null, null, null, null, 'p1-king', null ],
+  [ null, 'p1', null, null, null, 'p2', null, null ],
+  [ 'p1', null, 'p1', null, 'p1', null, 'p2', null ],
+  [ null, null, null, null, null, null, null, 'p2' ],
+  [ 'p1', null, 'p1', null, null, null, null, null ],
   [ null, 'p1', null, 'p2-king', null, 'p2', null, 'p2' ],
   [ 'p1', null, null, null, null, null, 'p2', null ],
   [ null, 'p1', null, null, null, 'p2', null, 'p2' ],

@@ -4,18 +4,23 @@ import Board from './Board';
 import {
   validMovesForPieceOnBoard,
   calculatePiecesAfterMove,
-  initCheckersBoard
+  initCheckersBoard,
+  jumpyCheckersBoard,
 } from './util';
 
 
 class Game extends Component {
   state = {
-    pieces: initCheckersBoard, // && kingCheckersBoard,
+    pieces: initCheckersBoard, //jumpyCheckersBoard, //, // && kingCheckersBoard,
     selectedSquare: null,
     moves: [],
     turn: 'p1',
   }
 
+  componentDidMount(){
+//    setTimeout(()=> this.setState({ turn: 'p2' }), 500);
+  }
+  
   componentDidUpdate(prevProps, prevState){
     if(
       ( this.props.mode === 'cp' && this.state.turn === 'p2' ) &&
@@ -28,10 +33,7 @@ class Game extends Component {
 
     if(!cpMove) return;
     
-    const { turnOver, pieces } = calculatePiecesAfterMove(
-      this.state.pieces,
-      cpMove
-    );
+    const { turnOver, pieces } = calculatePiecesAfterMove(this.state.pieces, cpMove);
 
     // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
     setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }, ()=> turnOver && this.checkEndGame()), 500);
@@ -44,6 +46,22 @@ class Game extends Component {
 
       setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' },
                                     ()=> nextTurnOver && this.checkEndGame()), 1100);
+
+      if( !nextTurnOver ){
+        const { pieces: lastPieces, turnOver: kingNotStillJumping } = calculatePiecesAfterMove(
+          nextPieces,
+          cpMove.slice(2)
+        );
+
+        if( kingNotStillJumping )
+          setTimeout(()=> this.setState({ pieces: lastPieces, turn: 'p1' },
+                                        ()=> nextTurnOver && this.checkEndGame()), 1600);
+        else {
+          const { pieces: endKingPieces } = calculatePiecesAfterMove( lastPieces, [cpMove[2], cpMove[2]] );
+          setTimeout(()=> this.setState({ pieces: endKingPieces, turn: 'p1' },
+                                        ()=> nextTurnOver && this.checkEndGame()), 1600 );
+        }
+      }
     }
     
     
