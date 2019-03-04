@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 import Game from './Game';
-import { calculateAllTurnOptions } from './util';
+import { calculateAllTurnOptions, calculatePiecesAfterMove } from './util';
 
 class App extends Component {
   state = {
@@ -14,38 +14,55 @@ class App extends Component {
     this.setState({ winner })
 
   cpMove = (pieces, player='p2')=>{
-    // if the choice is multijump, the entire chain will be returned. Game will delay render loop
-
-    // here call cpPlayer.js.cpChooseMove
-
+    const otherPlayer = { p1: 'p2', p2: 'p1' }[player];
     
-    // non-king moves
-    
-    // there, generate (and memoize?) a move chart to some depth
-    // at each possible leaf node (game state), calculate a game state value
-    ///// gsv = #p1s + 3*#p1-kings + #edgeP1s - that for p2
-    // or vice versa for the cp I suppose
-    // assign Infinity / -Infinity for endGame.
-
-    // use the minimax algorithm to bubble the move values up the tree
-    // select the move based on that
-
-    
-    // king moves / multijump
-    
-    // multijump / king moves should be calculated to depth of 3, with each permutation considered a different move
-    // this gives a branching factor of 8, which with a move depth of 4 means a search size of 4096 per king
-    // hopefully this is sufficiently simple for runtime, most boards aren't nearly so complex
-    // multijump for non-king is floor( (N-1)/2 ) maximum by nature anyhow, so 3 is enough for that always
-
-
     // generate list of valid moves
 
-    const allMoves = calculateAllTurnOptions(pieces, 'p2');
+    const allMoves = calculateAllTurnOptions(pieces, player);
 
     if(!allMoves.length) return; // game is over already
+
+    // for each turn option, determine the value at the end, pick the biggest value
+    // at each possible leaf node (game state), calculate a game state value
+    ///// gsv = #p1s + 3*#p1-kings + #edgeP1s - that for p2
+
+    const moveResults = allMoves.map(moves =>
+      moves.reduce((p, move, mi)=> calculatePiecesAfterMove(p, [
+        ...moves.slice(mi),
+        mi === moves.length -1 ? moves[mi] : undefined,
+      ]).pieces, pieces)
+    );
     
-    return allMoves[ Math.floor(allMoves.length * Math.random()) ]; // pick a move
+    const moveValues = moveResults.map(resultPieces => {
+      const playerPieces = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece => (piece && piece === player)).length, 0);
+      
+      const playerKings = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece => (piece && piece === player+'king')).length, 0);
+      
+      const playerEdges = resultPieces.reduce((p, col, ci)=> p+ (ci > 0 && ci < resultPieces.length-1) ? (
+        0 ) : ( col.filter(piece=> (piece && piece.includes(player))).length ), 0);
+
+
+      
+      const otherPieces = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece=> (piece && piece === otherPlayer && !piece.includes('jumped'))).length, 0);
+      
+      const otherKings = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece=> (piece && piece === otherPlayer+'-king' && !piece.includes('jumped'))).length, 0);
+      
+      const otherEdges = resultPieces.reduce((p, col, ci)=> p+ (ci > 0 && ci < resultPieces.length-1) ? (
+        0 ) : ( col.filter(piece=> (piece && piece.includes(otherPlayer) && !piece.includes('jumped'))).length ), 0);
+
+      
+      return playerPieces + 3*playerKings + playerEdges - otherPieces - 3*otherKings - otherEdges;
+    });
+    
+    const bestMove = moveValues.reduce((moveIndex, result, ci)=> (result > moveValues[moveIndex] ? ci : moveIndex), 0);
+    
+    //return allMoves[ Math.floor(allMoves.length * Math.random()) ]; // pick a move randomly
+    
+    return allMoves[ bestMove ]; // pick the best move by the formula
   }
   
   render() {

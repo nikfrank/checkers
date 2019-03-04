@@ -11,14 +11,14 @@ import {
 
 class Game extends Component {
   state = {
-    pieces: initCheckersBoard, //jumpyCheckersBoard, //, // && kingCheckersBoard,
+    pieces: initCheckersBoard, //jumpyCheckersBoard,  && kingCheckersBoard,
     selectedSquare: null,
     moves: [],
     turn: 'p1',
   }
 
   componentDidMount(){
-//    setTimeout(()=> this.setState({ turn: 'p2' }), 500);
+    (Math.random() > 0.5) && setTimeout(()=> this.setState({ turn: 'p2' }), 100);
   }
   
   componentDidUpdate(prevProps, prevState){
