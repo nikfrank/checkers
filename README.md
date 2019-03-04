@@ -19,7 +19,9 @@ We're starting today from a 2p-local game, out goal is to add a basic computer p
   - review multijump options
   - pick one randomly
 - move pieces on board
-  - delay multijump for UX
+  - delay move for UX
+  - playing multijumps
+  - delay multijumps for UX
 - improving decision
   - evaluate options
   - pick the best one
@@ -293,7 +295,12 @@ now that we've chosen a move, making that move won't be that much more complicat
 //...
 ```
 
+this will let us make single moves, and does so jarringly quickly
 
+
+#### delay move for UX
+
+we can wait half a second before reviewing how the `calculatePiecesAfterMove` function is working
 
 <sub>./src/Game.js</sub>
 ```js
@@ -308,13 +315,37 @@ now that we've chosen a move, making that move won't be that much more complicat
 
     const { turnOver, pieces } = calculatePiecesAfterMove(this.state.pieces, cpMove);
 
-    // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
-    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }, ()=> turnOver && this.checkEndGame()), 500);
-
+    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }, 500);
   }
 
 //...
 ```
+
+okay, we're passing the `pieces` in, which makes sense given the function's signature
+
+what's happening to our `cpMove` when we have more than one move?
+
+remember the signature for the function
+
+<sub>./src/util.js</sub>
+```js
+//...
+export const calculatePiecesAfterMove = (inputPieces, [moveFrom, moveTo])=>{
+  //...
+}
+```
+
+those `[]` square brackets are [destructuring](https://www.google.com/search?q=array+argument+destructuring) the input argument
+
+what happens when our `cpMove` is longer than two (from, to), is the extra entries in the array will be ignored.
+
+that's good, but we're going to want to make those moves too!
+
+
+
+
+#### playing multijumps
+
 
 
 primarily, the difference is that our selection will list all the jumps in a multijump, so we'll have to make sure to make all those move correctly.
