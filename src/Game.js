@@ -17,59 +17,8 @@ class Game extends Component {
     turn: 'p1',
   }
 
-  componentDidMount(){
-    (Math.random() > 0.5) && setTimeout(()=> this.setState({ turn: 'p2' }), 100);
-  }
-  
-  componentDidUpdate(prevProps, prevState){
-    if(
-      ( this.props.mode === 'cp' && this.state.turn === 'p2' ) &&
-      ( prevState.turn !== 'p2' )
-    ) this.makeCPmove();
-  }
-
-  makeCPmove = ()=>{
-    const cpMove = this.props.cpMove(this.state.pieces);
-
-    if(!cpMove) return;
-    
-    const { turnOver, pieces } = calculatePiecesAfterMove(this.state.pieces, cpMove);
-
-    // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
-    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }, ()=> turnOver && this.checkEndGame()), 500);
-
-    if(!turnOver) {
-      const { turnOver: nextTurnOver, pieces: nextPieces } = calculatePiecesAfterMove(
-        pieces,
-        cpMove.slice(1)
-      );
-
-      setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' },
-                                    ()=> nextTurnOver && this.checkEndGame()), 1100);
-
-      if( !nextTurnOver ){
-        const { pieces: lastPieces, turnOver: kingNotStillJumping } = calculatePiecesAfterMove(
-          nextPieces,
-          cpMove.slice(2)
-        );
-
-        if( kingNotStillJumping )
-          setTimeout(()=> this.setState({ pieces: lastPieces, turn: 'p1' },
-                                        ()=> nextTurnOver && this.checkEndGame()), 1600);
-        else {
-          const { pieces: endKingPieces } = calculatePiecesAfterMove( lastPieces, [cpMove[2], cpMove[2]] );
-          setTimeout(()=> this.setState({ pieces: endKingPieces, turn: 'p1' },
-                                        ()=> nextTurnOver && this.checkEndGame()), 1600 );
-        }
-      }
-    }
-    
-    
-    // if cp jumped and didn't finish turn, delay -> recurse.
-  }
   
   onClickCell = (col, row)=> {
-    if( this.props.mode === 'cp' && this.state.turn !== 'p1' ) return;
     
     const { moves, turn, selectedSquare } = this.state;
     const selectedPiece = this.state.pieces[col][row];
@@ -105,7 +54,6 @@ class Game extends Component {
 
     // for turn, find all his pieces, find all their moves
     // if either is `none`, he loses
-    // can use quirks "validMoves" as endGame state is invariant on strictness of movement rules.
     
     const lost = pieces.reduce( (losingGame, colOfPieces, colIndex)=>(
       colOfPieces.reduce( (losing, piece, rowIndex)=> (
