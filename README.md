@@ -167,6 +167,7 @@ based on the example in the docs, we'll be able to run code whenever some `state
 
 here we'll check that `this.state.turn` is `'p2'` and `prevState.turn` isn't, which means our computer player should pick his move!
 
+<sub>./src/Game.js</sub>
 ```js
 //...
 
@@ -188,11 +189,87 @@ here we'll check that `this.state.turn` is `'p2'` and `prevState.turn` isn't, wh
 
 ### computer player
 
+we'll be able to implement the entire computer player in this one function (though we may choose to refactor a bit later)
 
-  - list available options
-  - review multijump options
-  - pick one randomly
-- move pieces on board
+it will be instructive to think through in English (or any other language not Java) how we've been picking checkers move our entire lives
+
+```
+first we look at the board, noting which pieces are ours - we definitely can't move someone else's pieces
+
+only some of our pieces can move, and if any can make jumps we have to make a jump
+
+now we review our pieces, and find the jumps and multi-jumps available or if none, non-jump moves
+
+...
+
+now that we know all the options available for our turn, we want to choose the best one!
+
+probably if we can jump a lot of pieces, we should take that option
+
+if we can jump a piece and make a king, that sounds good
+
+if there's no other jumps, we should try to king a piece
+
+otherwise, we can try to get a piece to the edge of the board, where it can't be captured
+
+```
+
+roughly speaking, we get a list of options, evaluate their quality, and pick the best one.
+
+
+#### list available options
+
+we have a function for this! Let's call it and see what we get back from it
+
+<sub>./src/Game.js</sub>
+```js
+//...
+
+  makeCPmove = ()=>{
+    // here we'll calculate available moves, evaluate them, and choose one.
+    const allMoves = calculateAllTurnOptions(this.state.pieces, this.state.turn);
+    console.log(allMoves);
+  }
+
+//...
+```
+
+we can see on the console an array of turn-arrays (single moves or multi-jumps) of move-arrays (two numbers [col, row])
+
+
+#### review multijump options
+
+I found it very useful while writing this game to read through a few options to make sure they make sense on the board. Remeber the turns are `[moveFrom, moveTo, restMoveTos...]` and each move is `[col, row]` (which are zero-indexed of course!
+
+making the decision should be pretty easy once we can imagine all the moves from the output turn-move-arrays
+
+
+#### pick one randomly
+
+our first goal will just be to program the computer to play a move for our user to play against
+
+so let's pick one without thinking about it too much for now
+
+<sub>./src/Game.js</sub>
+```js
+//...
+
+  makeCPmove = ()=>{
+    // here we'll calculate available moves, evaluate them, and choose one.
+    const allMoves = calculateAllTurnOptions(this.state.pieces, this.state.turn);
+
+    const cpMove = allMoves[0];
+  }
+
+//...
+```
+
+that was easy lol. Now we can have the computer play the move, and we'll have programmed the worst computer player in history (quickly though!)
+
+
+### move pieces on board
+
+
   - delay multijump for UX
 - improving decision
   - evaluate options
