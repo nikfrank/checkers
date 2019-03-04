@@ -267,7 +267,59 @@ so let's pick one without thinking about it too much for now
 that was easy lol. Now we can have the computer play the move, and we'll have programmed the worst computer player in history (quickly though!)
 
 
+
 ### move pieces on board
+
+
+now that we've chosen a move, making that move won't be that much more complicated than it was for the user-player.
+
+<sub>./src/Game.js</sub>
+```js
+//...
+
+  makeCPmove = ()=>{
+    // here we'll calculate available moves, evaluate them, and choose one.
+    const allMoves = calculateAllTurnOptions(this.state.pieces, this.state.turn);
+
+    const cpMove = allMoves[0];
+
+
+    const { turnOver, pieces } = calculatePiecesAfterMove(this.state.pieces, cpMove);
+
+    this.setState({ pieces, turn: turnOver? 'p1' : 'p2' });
+
+  }
+
+//...
+```
+
+
+
+<sub>./src/Game.js</sub>
+```js
+//...
+
+  makeCPmove = ()=>{
+    // here we'll calculate available moves, evaluate them, and choose one.
+    const allMoves = calculateAllTurnOptions(this.state.pieces, this.state.turn);
+
+    const cpMove = allMoves[0];
+
+
+    const { turnOver, pieces } = calculatePiecesAfterMove(this.state.pieces, cpMove);
+
+    // if turn is over, delay 500ms -> setState({ turn: 'p1', pieces: nextPieces })
+    setTimeout(()=> this.setState({ pieces, turn: turnOver? 'p1' : 'p2' }, ()=> turnOver && this.checkEndGame()), 500);
+
+  }
+
+//...
+```
+
+
+primarily, the difference is that our selection will list all the jumps in a multijump, so we'll have to make sure to make all those move correctly.
+
+
 
 
   - delay multijump for UX
@@ -276,6 +328,7 @@ that was easy lol. Now we can have the computer play the move, and we'll have pr
   - pick the best one
   - psudeocode minimax algorithm (homework!)
 - test game with enzyme
+- read utility functions, refactor them for legibility
 
 
 
