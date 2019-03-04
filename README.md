@@ -373,9 +373,11 @@ if the turn isn't over, we should probably keep moving!
 //...
 ```
 
+[js array's built in .slice function](https://www.google.com/search?q=mdn+js+array+slice) is a shining star here
+
 of course, the next move could still not be the end of the turn... anyone who wants to write this as a `do...while` loop is welcome to try! (javascript kept the syntax just for you)
 
-copy-pasting this logic repeatedly will also work (I did that, so I know for sure)
+copy-pasting this logic repeatedly will also work (I did that, so I know it'll work for sure)
 
 
 
