@@ -20,10 +20,7 @@ class App extends Component {
              { this.state.winner } WINS!
            </div>
         ) : (
-           <Game onWinner={this.onWinner}
-                 mode='2p'
-                 cpMove={this.cpMove}
-           />
+           <Game onWinner={this.onWinner} mode='cp' />
         )}
       </div>
     );
