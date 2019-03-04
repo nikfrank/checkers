@@ -545,16 +545,20 @@ Enzyme.configure({ adapter: new Adapter() });
 
 
 
+#### test the Board for onClick accuracy
 
-#### install enzyme
 #### test the entire 2p local flow
+
 #### move the computer player logic to "network" layer
+  - ie refactor chooseCpMove from makeCpMove
+  
 #### mock the network layer and test the cp mode
 
 ---
 ---
 
-#### integrate to the game server
+
+#### integrate to the game server (large next section of the course)
 
 
 
