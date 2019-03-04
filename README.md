@@ -22,6 +22,7 @@ We're starting today from a 2p-local game, out goal is to add a basic computer p
   - delay move for UX
   - playing multijumps
   - delay multijumps for UX
+  - terminating infinite king jumps
 - improving decision
   - evaluate options
   - pick the best one
@@ -312,6 +313,7 @@ we can wait half a second before reviewing how the `calculatePiecesAfterMove` fu
 
     const cpMove = allMoves[0];
 
+    // placeholder for future better decision logic
 
     const { turnOver, pieces } = calculatePiecesAfterMove(this.state.pieces, cpMove);
 
@@ -346,16 +348,121 @@ that's good, but we're going to want to make those moves too!
 
 #### playing multijumps
 
+so far, making computer moves is the same as human moves
+
+primarily, the difference is that our selection will list all the jumps in a multijump, so we'll have to make sure to make all those move correctly. Whereas the human moves we could just wait for the user to click repeatedly.
 
 
-primarily, the difference is that our selection will list all the jumps in a multijump, so we'll have to make sure to make all those move correctly.
+what we can do here is check that `turnOver` output we got back from calling `calculatePiecesAfterMove`
+
+if the turn isn't over, we should probably keep moving!
+
+<sub>./src/Game.sj</sub>
+```js
+//...
+
+    if(!turnOver) {
+      const { turnOver: nextTurnOver, pieces: nextPieces } = calculatePiecesAfterMove(
+        pieces,
+        cpMove.slice(1)
+      );
+
+      setTimeout(()=> this.setState({ pieces: nextPieces, turn: nextTurnOver? 'p1' : 'p2' }, 1000);
+    }
+//...
+```
+
+of course, the next move could still not be the end of the turn... anyone who wants to write this as a `do...while` loop is welcome to try! (javascript kept the syntax just for you)
+
+copy-pasting this logic repeatedly will also work (I did that, so I know for sure)
 
 
 
+#### delay multijumps for UX
 
-  - delay multijump for UX
-- improving decision
-  - evaluate options
+remember, this logic is running syncronously (fast), so we can set a series of timeouts by increasing the timeout-length each time (note 1000ms = 1s is set in the previous solution)
+
+
+#### terminating infinite king jumps
+
+There's a little wrinkle though when we want to terminate a king jump: kings can jump any number of times infinitely!
+
+(as they can jump back and forth over a piece if they please, as that piece isn't removed until the end of the turn)
+
+This led the `calculateAllTurnOptions` to set a maximum depth for finding multijump moves
+
+- it is currently coded to give up after three jumps, as this is the maximum a non-king can make
+- yes, techincally that makes it incorrect
+- yes, you should feel free to review the code and reimplement it as a recursive algorithm with maxDepth as a param
+- yes, you could also define a better termination condition for ignoring loops in king movement
+- do you want to teach the class?
+
+
+Practically, what this means is, like in user-moves, a king jump can be terminated by playing `[moveFrom, moveFrom]` to the same space it started on
+
+
+so at the end of our repetition (or loop for the brave), if the turn still isn't over, we can terminate the terminate the king move by passing the last position in to `calculatePiecesAfterMove` as the `from` and `to` the same.
+
+
+<sub>./src/Game.js</sub>
+```js
+//...
+  if( numberOfJumps === cpMove.length && !turnOver ){
+    const { pieces: endPieces } = calculatePiecesAfterMove( prevPieces, [cpMove[cpMove.length-1], cpMove[cpMove.length-1]] );
+    setTimeout(()=> this.setState({ pieces: endPieces, turn: 'p1' }, 500 + 500*numberOfJumps );
+  }
+//...
+```
+
+
+the exact code you end up with may be different - I'm not just publishing a solution! I'm not stackOverflow!
+
+these are the tools you'll need to succeed.
+
+
+
+### improving decision
+
+ok, we got the computer player moving his pieces around. However, he's a horrendous player! Let's get back to the top of the `makeCPMove` function and write some better decision logic.
+
+<sub>./src/Game.js</sub>
+```js
+//...
+
+  makeCPmove = ()=>{
+    // here we'll calculate available moves, evaluate them, and choose one.
+    const allMoves = calculateAllTurnOptions(this.state.pieces, this.state.turn);
+
+    const cpMove = allMoves[0];
+
+    // placeholder for future better decision logic
+  }
+
+//...
+```
+
+#### evaluate options
+
+for each option from `allMoves`, we want to calculate a prospective value. Later we'll look at the [minimax algorithm](https://www.google.com/search?q=minimax+algorithm) for looking more than one move ahead.
+
+Based on our pseudocode heuristic from before, we could say the value of a given boardful of pieces is given by:
+
+```
+1 point for each of my pieces
+2 bonus points for each of my kings
+1 bonus point for each piece I have on an edge
+
+minus that amount for my opponent
+```
+
+let's use our trusty `.map` and `.reduce` to compute the value for the board-situation after each option for our turn.
+
+<sub>./src/Game.js</sub>
+```js
+
+```
+
+
   - pick the best one
   - psudeocode minimax algorithm (homework!)
 - test game with enzyme
