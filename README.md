@@ -122,6 +122,56 @@ onClickCell = (col, row)=> {
 //...
 ```
 
+ok, now p2 can't do anything!
+
+How are we going to respond to p1 moving?
+
+Let's start by thinking through what happends when p1 does move:
+
+- user clicks a square to move to
+- eventually the turn is determined to be over by the `calculatePiecesAfterMove` function during ```js
+    } else if(selectedMove){
+      const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
+        this.state.pieces,
+        [selectedSquare, [col, row]]
+      );
+```
+- `this.state.turn` is updated to 'p2'
+
+
+the last item in the list is very important, as we will use it to trigger the computer player.
+
+when the `state` updates, React will call a number of [lifecycle functions](https://www.google.com/search?q=react+lifecycle+didupdate) 
+
+
+[componentDidUpdate](https://reactjs.org/docs/react-component.html#componentdidupdate) will be triggered just as soon as `this.state.turn` is updated to be 'p2'
+
+
+based on the example in the docs, we'll be able to run code whenever some `state` or `props` value changes...
+
+(( joke ))
+
+here we'll check that `this.state.turn` is `'p2'` and `prevState.turn` isn't, which means our computer player should pick his move!
+
+```js
+//...
+
+  componentDidUpdate(prevProps, prevState){
+    if(
+      ( this.props.mode === 'cp' && this.state.turn === 'p2' ) &&
+      ( prevState.turn !== 'p2' )
+    ) this.makeCPmove();
+  }
+
+  
+  makeCPmove = ()=>{
+    // here we'll calculate available moves, evaluate them, and choose one.
+  }
+
+//...
+```
+
+
 
 
 

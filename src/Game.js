@@ -19,7 +19,6 @@ class Game extends Component {
 
   
   onClickCell = (col, row)=> {
-    
     const { moves, turn, selectedSquare } = this.state;
     const selectedPiece = this.state.pieces[col][row];
     const selectedMove = (moves[col]||[])[row];
