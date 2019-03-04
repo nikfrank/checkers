@@ -404,7 +404,7 @@ This led the `calculateAllTurnOptions` to set a maximum depth for finding multij
 Practically, what this means is, like in user-moves, a king jump can be terminated by playing `[moveFrom, moveFrom]` to the same space it started on
 
 
-so at the end of our repetition (or loop for the brave), if the turn still isn't over, we can terminate the terminate the king move by passing the last position in to `calculatePiecesAfterMove` as the `from` and `to` the same.
+so at the end of our repetition (or loop for the brave), if the turn still isn't over, we can terminate the king move by passing the last position in to `calculatePiecesAfterMove` as the `from` and `to` the same.
 
 
 <sub>./src/Game.js</sub>
