@@ -154,7 +154,7 @@ Let's start by thinking through what happends when p1 does move:
         [selectedSquare, [col, row]]
       );
 ```
-- `this.state.turn` is updated to 'p2'
+- `this.state.turn` is updated to `'p2'`
 
 
 the last item in the list is very important, as we will use it to trigger the computer player.
