@@ -455,17 +455,89 @@ Based on our pseudocode heuristic from before, we could say the value of a given
 minus that amount for my opponent
 ```
 
-let's use our trusty `.map` and `.reduce` to compute the value for the board-situation after each option for our turn.
+let's use our trusty `.map` and `.reduce` to compute the board-situation after each option for our turn (then the value)
 
 <sub>./src/Game.js</sub>
 ```js
+    // for each turn option, determine the value at the end, pick the biggest value
+    // at each possible leaf node (game state), calculate a game state value
+    ///// gsv = #p1s + 3*#p1-kings + #edgeP1s - that for p2
+
+    const moveResults = allMoves.map(moves =>
+      moves.reduce((p, move, mi)=> calculatePiecesAfterMove(p, [
+        ...moves.slice(mi),
+        mi === moves.length -1 ? moves[mi] : undefined,
+      ]).pieces, pieces)
+    );
 
 ```
 
 
-  - pick the best one
-  - psudeocode minimax algorithm (homework!)
-- test game with enzyme
+<sub>./src/Game.js</sub>
+```js
+    const moveValues = moveResults.map(resultPieces => {
+      const playerPieces = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece => (piece && piece === player)).length, 0);
+      
+      const playerKings = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece => (piece && piece === player+'king')).length, 0);
+      
+      const playerEdges = resultPieces.reduce((p, col, ci)=> p+ (ci > 0 && ci < resultPieces.length-1) ? (
+        0 ) : ( col.filter(piece=> (piece && piece.includes(player))).length ), 0);
+
+
+      
+      const otherPieces = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece=> (piece && piece === otherPlayer && !piece.includes('jumped'))).length, 0);
+      
+      const otherKings = resultPieces.reduce((p, col)=>
+        p+ col.filter(piece=> (piece && piece === otherPlayer+'-king' && !piece.includes('jumped'))).length, 0);
+      
+      const otherEdges = resultPieces.reduce((p, col, ci)=> p+ (ci > 0 && ci < resultPieces.length-1) ? (
+        0 ) : ( col.filter(piece=> (piece && piece.includes(otherPlayer) && !piece.includes('jumped'))).length ), 0);
+
+      
+      return playerPieces + 3*playerKings + playerEdges - otherPieces - 3*otherKings - otherEdges;
+    });
+
+```
+
+
+#### pick the best one
+
+```js
+    const bestMove = moveValues.reduce((moveIndex, result, ci)=> (result > moveValues[moveIndex] ? ci : moveIndex), 0);
+    
+    return allMoves[ bestMove ]; // pick the best move by the formula
+```
+
+
+
+#### psudeocode minimax algorithm
+
+(coming soon...)
+
+
+### test game with enzyme
+
+[enzyme by airbnb](https://airbnb.io/enzyme/) is a fantastic testing utility for react components, which doesn't force us out of our isomorphic js environment! (everyone love isomorphic js!)
+
+
+`$ yarn add enzyme enzyme-adapter-react-16`
+
+<sub>./src/App.test.js</sub>
+```js
+//...
+
+import Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+
+Enzyme.configure({ adapter: new Adapter() });
+
+//...
+```
+
+
 - read utility functions, refactor them for legibility
 
 
@@ -513,7 +585,7 @@ let's use our trusty `.map` and `.reduce` to compute the value for the board-sit
 - PUT /game { move }
   - apiGateway, lambda, dynamo update call
 - GET /game/:id
-  - apiGatewat, lambda, dynamo read call
+  - apiGateway, lambda, dynamo read call
 - chat?
 
 
