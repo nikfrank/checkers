@@ -243,7 +243,7 @@ we can see on the console an array of turn-arrays (single moves or multi-jumps) 
 
 #### review multijump options
 
-I found it very useful while writing this game to read through a few options to make sure they make sense on the board. Remeber the turns are `[moveFrom, moveTo, restMoveTos...]` and each move is `[col, row]` (which are zero-indexed of course!
+I found it very useful while writing this game to read through a few options to make sure they make sense on the board. Remeber the turns are `[moveFrom, moveTo, ...restMoveTos]` and each move is `[col, row]` (which are zero-indexed of course!
 
 making the decision should be pretty easy once we can imagine all the moves from the output turn-move-arrays
 
