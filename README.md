@@ -13,8 +13,18 @@ We're starting today from a 2p-local game, out goal is to add a basic computer p
 2. 1p v cp local
 
 - select cp game or 2p local game
-- onUpdate lifecycle -> trigger cp play
-- algorithm for selecting move, test
+- didUpdate lifecycle -> trigger cp play
+- computer player
+  - list available options
+  - review multijump options
+  - pick one randomly
+- move pieces on board
+  - delay multijump for UX
+- improving decision
+  - evaluate options
+  - pick the best one
+  - psudeocode minimax algorithm (homework!)
+- test game with enzyme
 
 
 
@@ -126,6 +136,10 @@ ok, now p2 can't do anything!
 
 How are we going to respond to p1 moving?
 
+
+### didUpdate lifecycle -> trigger cp play
+
+
 Let's start by thinking through what happends when p1 does move:
 
 - user clicks a square to move to
@@ -172,22 +186,27 @@ here we'll check that `this.state.turn` is `'p2'` and `prevState.turn` isn't, wh
 ```
 
 
-
-
-
 ### computer player
 
 
+  - list available options
+  - review multijump options
+  - pick one randomly
+- move pieces on board
+  - delay multijump for UX
+- improving decision
+  - evaluate options
+  - pick the best one
+  - psudeocode minimax algorithm (homework!)
+- test game with enzyme
 
 
-
-#### unit test the cp player, improve cp play
 
 
 #### install enzyme
 #### test the entire 2p local flow
+#### move the computer player logic to "network" layer
 #### mock the network layer and test the cp mode
-#### mock the network layer and test the network 2p mode
 
 ---
 ---
