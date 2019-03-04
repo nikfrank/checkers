@@ -146,7 +146,8 @@ How are we going to respond to p1 moving?
 Let's start by thinking through what happends when p1 does move:
 
 - user clicks a square to move to
-- eventually the turn is determined to be over by the `calculatePiecesAfterMove` function during ```js
+- eventually the turn is determined to be over by the `calculatePiecesAfterMove` function during
+```js
     } else if(selectedMove){
       const { jumping, turnOver, pieces } = calculatePiecesAfterMove(
         this.state.pieces,
