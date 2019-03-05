@@ -4,10 +4,10 @@ import './Board.css';
 import Piece from './Piece';
 
 export default ({
-  size=8,
   onClick=(()=>0),
   pieces=[[]],
   moves=[[]],
+  size=pieces.length,
 })=> (
   <div className='Board'>
     {Array(size).fill(0).map((_, rowIndex)=> (
