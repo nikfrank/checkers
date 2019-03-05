@@ -6,13 +6,13 @@ import {
   validMovesForPieceOnBoard,
   calculatePiecesAfterMove,
   initCheckersBoard,
-  jumpyCheckersBoard,
+//  jumpyCheckersBoard,
 } from './util';
 
 
 class Game extends Component {
   state = {
-    pieces: jumpyCheckersBoard, //initCheckersBoard, //, // && kingCheckersBoard,
+    pieces: initCheckersBoard, //jumpyCheckersBoard, //, // && kingCheckersBoard,
     selectedSquare: null,
     moves: [],
     turn: 'p1',
@@ -26,7 +26,7 @@ class Game extends Component {
     if(
       ( this.props.mode === 'cp' && this.state.turn === 'p2' ) &&
       ( prevState.turn !== 'p2' )
-    ) this.makeCPmove();
+    ) this.checkEndGame() || this.makeCPmove();
   }
 
   
@@ -103,7 +103,7 @@ class Game extends Component {
         if( !lastTurnOver ){
           const { turnOver: kingTurnOver, pieces: kingPieces } = calculatePiecesAfterMove(
             lastPieces,
-            [cpMove[2], cpMove[2]]
+            [cpMove[3], cpMove[3]]
           );
 
           setTimeout(()=> this.setState({ pieces: kingPieces, turn: kingTurnOver? 'p1' : 'p2' }), 2000);
@@ -140,7 +140,7 @@ class Game extends Component {
         pieces,
         turn: nextTurn,
         selectedSquare: nextSelectedSquare,
-      }, ()=> turnOver && this.checkEndGame());
+      }, ()=> this.checkEndGame());
     }
   }
 
@@ -161,6 +161,7 @@ class Game extends Component {
     ), true);
 
     if(lost) this.props.onWinner(({ p1: 'p2', p2: 'p1' })[turn]);
+    return lost;
   }
 
   render() {
